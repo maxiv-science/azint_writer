@@ -13,6 +13,7 @@ setup(
     install_requires=[
         "numpy",
         "h5py",
+        "fabio",
         "azint",
     ],
     classifiers=[
