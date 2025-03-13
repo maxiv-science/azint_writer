@@ -1,6 +1,6 @@
-# Azint Writer
+# NXazint
 
-**Azint Writer** is a Python package for writing HDF5 files in the **NXazint** format, a new extension to the [NeXus](https://www.nexusformat.org/) standard. The NXazint format is specifically designed for storing data related to azimuthal integration in diffraction experiments.
+**NXazint** is a Python package for writing HDF5 files in the **NXazint** format, a new extension to the [NeXus](https://www.nexusformat.org/) standard. The NXazint format is specifically designed for storing data related to azimuthal integration in diffraction experiments.
 
 ---
 
@@ -18,11 +18,11 @@
 Install Azint Writer via `pip`:
 
 ```bash
-pip install azint-writer
+pip install NXazint
 ```
 or `conda (mamba)`
 ```bash
-conda install -c maxiv azint-writer
+conda install -c maxiv NXazint
 ```
 ---
 

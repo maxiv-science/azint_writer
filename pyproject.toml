@@ -3,4 +3,4 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
-write_to = 'azint_writer/_version.py'
+write_to = 'NXazint/_version.py'
