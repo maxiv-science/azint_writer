@@ -358,15 +358,6 @@ class NX_writer():
         with h5py.File(self.output_file, "r+") as fh_u:
             for key, value in data.items():
                 new_dset = fh_u.get(key)
-                
-                
-                print()
-                print(f'{key = }')
-                print(f'{new_dset = }')
-                print('----------------------', )
-                print()
-                
-                
                 if not new_dset:
                     new_dset = fh_u.create_dataset(key, dtype=value.dtype,
                                                    shape=(0, *value.shape),
