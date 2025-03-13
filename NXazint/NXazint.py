@@ -44,41 +44,46 @@ class BLNames(Enum):
     SPECIES = "SPECIES"
     VERITAS = "Veritas"
 
-class AzintFilewriter():
-    def __init__(self):
-        self.ai = None
+class NX_writer():
+    def __init__(self, ai, output_file):
+        self.ai = ai
+        self.output_file = output_file
         self.fh = None
         self.config = None
+        with h5py.File(self.output_file, "w") as fh_w:
+            self.fh = fh_w
+            if "entry" not in fh_w: # this condition can be omitted, check that
+                self.write_header()
         
-    def azint_writer(self, fh, config, ai):
-        logging.info(f"azint_writer started, azint version is {azint.__version__}")
+    def write_header(self):
+        logging.info(f"writing header started, azint version is {azint.__version__}")
 
-        entry = fh.create_group("entry", track_order=True)
+        entry = self.fh.create_group("entry", track_order=True)
         entry.attrs["NX_class"] = "NXentry"
         entry.attrs["default"] = "data" 
         logging.debug("entry is created in the file")
 
 
-        if ai.azimuth_axis is None:
+        if self.ai.azimuth_axis is None:
             logging.info("azimuth_axis is None, creating NXazint1d")
             definition = entry.create_dataset("definition", data="NXazint1d")
             definition.attrs["type"] = "NX_CHAR"
         
-        entry.create_dataset("solid_angle_applied", data=True if config["solid_angle"] else False)
+        entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
 
-        polarization = config["polarization_factor"] if config["polarization_factor"] is not None else 0
-        entry.create_dataset("polarization_applied", data=True if config["polarization_factor"]  is not None else False)
+        polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
+        entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
 
         logging.info("solid_angle_applied and polarization_applied data sets are created")
-        logging.info(f"solid_angle: {config['solid_angle']}")
-        logging.info(f"polarization_factor: {config['polarization_factor']}")
+        logging.info(f"solid_angle: {self.ai.solid_angle}")
+        logging.info(f"polarization_factor: {self.ai.polarization_factor}")
         
 
         # Add instrument
         instrument = entry.create_group("instrument", track_order=True)
         instrument.attrs["NX_class"] = "NXinstrument"
         instrument.attrs["default"] = "name" 
-        bl_name = self.get_bl_name_from_path(config["poni"], BLNames)
+        bl_name = self.get_bl_name_from_path(self.ai.poni, BLNames)
         logging.info(f"Beamline: {bl_name}")
         
         instrument["name"] = np.string_(bl_name)
@@ -95,7 +100,7 @@ class AzintFilewriter():
         source['name'] = np.string_("MAX IV")
         source['type'] = np.string_("Synchrotron X-ray Source")
         source['probe'] = np.string_("x-ray")
-        poni_file = config["poni"]
+        poni_file = self.ai.poni
         with open(poni_file, "r") as pf:
             try:
                 logging.info(f"Reading poni file ...")
@@ -119,7 +124,7 @@ class AzintFilewriter():
                 logging.error(f"Cannot open poni file: {e}")
 
         # Now handle data splitting
-        if ai.azimuth_axis is not None:
+        if self.ai.azimuth_axis is not None:
             logging.info(f"Creating 1D and 2D data ...")
             # 1D data subentry
             azint1dSE = entry.create_group("azint1d", track_order=True)
@@ -134,7 +139,7 @@ class AzintFilewriter():
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             prog.attrs["type"] = "NX_CHAR"
-            ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer 0.0.1")
+            ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nNXazint 0.0.1")
             ver.attrs["type"] = "NX_CHAR"
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             date.attrs["type"] = "NX_DATE_TIME"
@@ -160,17 +165,17 @@ class AzintFilewriter():
             wavelength2.attrs["units"] = "angstrom"
             wavelength2.attrs["type"] = "NX_FLOAT"
 
-            input.create_dataset("n_splitting", data=config["n_splitting"])
-            input.create_dataset("radial_axis", data=config["radial_bins"])
+            input.create_dataset("n_splitting", data=self.ai.n_splitting)
+            input.create_dataset("radial_axis", data=self.ai.radial_bins)
             input.create_dataset("azimuth_bins", data=1)
-            input.create_dataset("unit", data=ai.unit)
-            input.create_dataset("mask", data=config["mask"] if config["mask"] else "None")
+            input.create_dataset("unit", data=self.ai.unit)
+            input.create_dataset("mask", data=self.ai.mask if self.ai.mask else "None")
             
-            input.create_dataset("solid_angle", data=True if config["solid_angle"] else False)
+            input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
 
-            polarization = config["polarization_factor"] if config["polarization_factor"] is not None else 0
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
             input.create_dataset("polarization_factor", data=polarization)
-            error_model = config["error_model"] if config["error_model"] else "None"
+            error_model = self.ai.error_model if self.ai.error_model else "None"
             input.create_dataset("error_model", data=error_model)
 
 
@@ -179,7 +184,7 @@ class AzintFilewriter():
             azint1d.attrs["signal"] = "I"
             azint1d.attrs["axes"] = [".", "radial_axis"]
             azint1d.attrs["interpretation"] = "spectrum"
-            self.write_radial_axis(azint1d, ai.unit, ai.radial_axis, config["radial_bins"])
+            self.write_radial_axis(azint1d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
 
             azint2dSE = entry.create_group("azint2d", track_order=True)
             azint2dSE.attrs["NX_class"] = "NXsubentry"
@@ -193,7 +198,7 @@ class AzintFilewriter():
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             prog.attrs["type"] = "NX_CHAR"
-            ver = reduction.create_dataset("version", data="azint 1.1.0\nazint-writer 0.0.1")
+            ver = reduction.create_dataset("version", data="azint 1.1.0\nNXazint 0.0.1")
             ver.attrs["type"] = "NX_CHAR"
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             date.attrs["type"] = "NX_DATE_TIME"
@@ -209,17 +214,17 @@ class AzintFilewriter():
             wavelength2.attrs["units"] = "angstrom"
             wavelength2.attrs["type"] = "NX_FLOAT"
 
-            input.create_dataset("n_splitting", data=config["n_splitting"])
-            input.create_dataset("radial_axis", data=config["radial_bins"])
-            input.create_dataset("azimuth_bins", data=config["azimuth_bins"])
-            input.create_dataset("unit", data=ai.unit)
-            input.create_dataset("mask", data=config["mask"] if config["mask"] else "None")
+            input.create_dataset("n_splitting", data=self.ai.n_splitting)
+            input.create_dataset("radial_axis", data=self.ai.radial_bins)
+            input.create_dataset("azimuth_bins", data=self.ai.azimuth_bins)
+            input.create_dataset("unit", data=self.ai.unit)
+            input.create_dataset("mask", data=self.ai.mask if self.ai.mask else "None")
             
-            input.create_dataset("solid_angle", data=True if config["solid_angle"] else False)
+            input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
 
-            polarization = config["polarization_factor"] if config["polarization_factor"] is not None else 0
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
             input.create_dataset("polarization_factor", data=polarization)
-            error_model = config["error_model"] if config["error_model"] else "None"
+            error_model = self.ai.error_model if self.ai.error_model else "None"
             input.create_dataset("error_model", data=error_model)
 
             azint2d = azint2dSE.create_group("data")
@@ -228,23 +233,23 @@ class AzintFilewriter():
             azint2d.attrs["axes"] = [".", "azimuthal_axis", "radial_axis"]
             azint2d.attrs["interpretation"] = "image"
             entry["data"] = h5py.SoftLink('/entry/azint1d/data')
-            self.write_radial_axis(azint2d, ai.unit, ai.radial_axis, config["radial_bins"])
+            self.write_radial_axis(azint2d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
 
-            norm = ai.norm.reshape(ai.output_shape)
+            norm = self.ai.norm.reshape(self.ai.output_shape)
             dsetnorm = azint2d.create_dataset("norm", data=norm)
             dsetnorm.attrs["units"] = "arbitrary units"
             dsetnorm.attrs["long_name"] = "normalized intensity"
             dsetnorm.attrs["type"] = "NX_FLOAT"
 
-            dset = azint2d.create_dataset("azimuthal_axis", data=ai.azimuth_axis)
+            dset = azint2d.create_dataset("azimuthal_axis", data=self.ai.azimuth_axis)
             dset.attrs["units"] = "degrees"
             dset.attrs["long_name"] = "Azimuthal bin center"
             dset.attrs["type"] = "NX_FLOAT"
 
-            if isinstance(config["azimuth_bins"], Iterable):
-                aedges = config["azimuth_bins"]
+            if isinstance(self.ai.azimuth_bins, Iterable):
+                aedges = self.ai.azimuth_bins
             else:
-                acentres = ai.azimuth_axis
+                acentres = self.ai.azimuth_axis
                 awidth = acentres[1] - acentres[0]
                 aedges = (acentres - 0.5 * awidth)
                 aedges = np.append(aedges, aedges[-1] + awidth)
@@ -265,7 +270,7 @@ class AzintFilewriter():
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             prog.attrs["type"] = "NX_CHAR"
-            ver = reduction.create_dataset("version", data="azint 1.1.0\nazint-writer 0.0.1")
+            ver = reduction.create_dataset("version", data="azint 1.1.0\nNXazint 0.0.1")
             ver.attrs["type"] = "NX_CHAR"
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             date.attrs["type"] = "NX_DATE_TIME"
@@ -292,21 +297,21 @@ class AzintFilewriter():
             wavelength2.attrs["units"] = "angstrom"
             wavelength2.attrs["type"] = "NX_FLOAT"
             
-            input.create_dataset("n_splitting", data=config["n_splitting"])
-            input.create_dataset("radial_axis", data=config["radial_bins"])
-            azimuth_bins = config["azimuth_bins"] if config["azimuth_bins"] else 1
+            input.create_dataset("n_splitting", data=self.ai.n_splitting)
+            input.create_dataset("radial_axis", data=self.ai.radial_bins)
+            azimuth_bins = self.ai.azimuth_bins if self.ai.azimuth_bins else 1
             input.create_dataset("azimuth_bins", data=azimuth_bins)
-            input.create_dataset("unit", data=ai.unit)
-            if config["mask"]:
-                input.create_dataset("mask", data=config["mask"])
+            input.create_dataset("unit", data=self.ai.unit)
+            if self.ai.mask is not None and np.any(self.ai.mask):
+                input.create_dataset("mask", data=self.ai.mask)
             else:
                 input.create_dataset("mask", data="None")
             
-            input.create_dataset("solid_angle", data=True if config["solid_angle"] else False)
+            input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
 
-            polarization = config["polarization_factor"] if config["polarization_factor"] is not None else 0
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
             input.create_dataset("polarization_factor", data=polarization)
-            error_model = config["error_model"] if config["error_model"] else "None"
+            error_model = self.ai.error_model if self.ai.error_model else "None"
             input.create_dataset("error_model", data=error_model)
             
             azint1d = entry.create_group("data", track_order=True)
@@ -314,16 +319,75 @@ class AzintFilewriter():
             azint1d.attrs["signal"] = "I"
             azint1d.attrs["axes"] = [".", "radial_axis"]
             azint1d.attrs["interpretation"] = "spectrum"
-            self.write_radial_axis(azint1d, ai.unit, ai.radial_axis, config["radial_bins"])
+            self.write_radial_axis(azint1d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
 
-            entry.attrs["default"] = "data" 
+            entry.attrs["default"] = "data"
+
+    
+        
+    def save_divide(self, a, b):
+        return np.divide(a, b, out=np.zeros_like(a), where=b!=0.0)
+
+    def add_data(self, integrated_data):
+
+        res, errors, norm = integrated_data
+        data = {}
+        if res.ndim == 1: # must be radial bins only, no eta, ie 1d.
+            I = self.save_divide(res, norm)
+            if errors is not None:
+                errors = self.save_divide(errors, norm)
+                data["/entry/data/I_errors"] = errors
+        else:  # will have eta bins
+            I = self.save_divide(np.sum(res, axis=0), np.sum(norm, axis=0))
+            cake = self.save_divide(res, norm)
+            data["/entry/azint2d/data/I"] = cake
+            if errors is not None:
+                data["/entry/azint2d/data/I_errors"] = self.save_divide(errors, norm)
+                errors = self.save_divide(np.sum(errors, axis=0), np.sum(norm, axis=0))
+                data["/entry/azint1d/data/I_errors"] = errors
+                data["/entry/data/I_errors"] = errors
+
+        if self.ai.azimuth_axis is not None:
+            data["/entry/azint1d/data/I"] = I
+        else:
+            data["/entry/data/I"] = I
+
+        # data = integrated_data
+
+        with h5py.File(self.output_file, "r+") as fh_u:
+            for key, value in data.items():
+                new_dset = fh_u.get(key)
+                
+                
+                print()
+                print(f'{key = }')
+                print(f'{new_dset = }')
+                print('----------------------', )
+                print()
+                
+                
+                if not new_dset:
+                    new_dset = fh_u.create_dataset(key, dtype=value.dtype,
+                                                   shape=(0, *value.shape),
+                                                   maxshape=(None, *value.shape),
+                                                   chunks=(1, *value.shape))
+                    # I and I_error created here
+                    new_dset.attrs["units"] = "arbitrary units"
+                    new_dset.attrs["long_name"] = "intensity"
+                    if "I_error" in key:
+                        new_dset.attrs["units"] = "arbitrary units"
+                        new_dset.attrs["long_name"] = "estimated errors on intensity"
+
+                n = new_dset.shape[0]
+                new_dset.resize(n + 1, axis=0)
+                new_dset[n] = value
 
     def get_bl_name_from_path(self, path, bl_names_enum):
         for bl_name in bl_names_enum:
             if bl_name.value.lower() in path.lower():
                 return bl_name.value
         return "Unknown"
-      
+
     def write_radial_axis(self, group, unit, radial_axis, radial_bins):
         # real dataset for radial axis is always "radial axis"
         dset = group.create_dataset("radial_axis", data=radial_axis)
@@ -341,7 +405,7 @@ class AzintFilewriter():
             width = centres[1]-centres[0]
             edges = (centres-0.5*width)
             edges = np.append(edges,edges[-1]+width)
-            
+
         dsete = group.create_dataset(f"radial_axis_edges", data=edges)
         dsete.attrs["type"] = "NX_FLOAT"
         if unit == "q":
@@ -350,30 +414,3 @@ class AzintFilewriter():
         else:
             dsete.attrs["units"] = "degrees"
             dsete.attrs["long_name"] = "Edges of tth bins"
-        
-    def save_divide(self, a, b):
-        return np.divide(a, b, out=np.zeros_like(a), where=b!=0.0)
-
-    def integrate(self, ai, img, mask):
-        res, errors, norm = ai.integrate(img, mask=mask, normalized=False)
-        data = {}
-        if res.ndim == 1: # must be radial bins only, no eta, ie 1d.
-            I = self.save_divide(res, norm)
-            if errors is not None:
-                errors = self.save_divide(errors, norm)
-                data["/entry/data/I_errors"] = errors
-        else:  # will have eta bins
-            I = self.save_divide(np.sum(res, axis=0), np.sum(norm, axis=0))
-            cake = self.save_divide(res, norm)
-            data["/entry/azint2d/data/I"] = cake
-            if errors is not None:
-                data["/entry/azint2d/data/I_errors"] = self.save_divide(errors, norm)
-                errors = self.save_divide(np.sum(errors, axis=0), np.sum(norm, axis=0))
-                data["/entry/azint1d/data/I_errors"] = errors
-                data["/entry/data/I_errors"] = errors
-
-        if ai.azimuth_axis is not None:
-            data["/entry/azint1d/data/I"] = I
-        else:
-            data["/entry/data/I"] = I
-        return data
