@@ -169,8 +169,8 @@ class NX_writer():
             input.create_dataset("n_splitting", data=self.ai.n_splitting)
             input.create_dataset("radial_axis", data=self.ai.radial_bins)
             input.create_dataset("azimuth_bins", data=1)
-            input.create_dataset("unit", data=self.ai.unit)
-            input.create_dataset("mask", data=self.ai.mask if self.ai.mask else "None")
+            input.create_dataset("unit", data=self.ai.unit)    
+            input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
             
             input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
 
@@ -219,7 +219,7 @@ class NX_writer():
             input.create_dataset("radial_axis", data=self.ai.radial_bins)
             input.create_dataset("azimuth_bins", data=self.ai.azimuth_bins)
             input.create_dataset("unit", data=self.ai.unit)
-            input.create_dataset("mask", data=self.ai.mask if self.ai.mask else "None")
+            input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
             
             input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
 
@@ -303,10 +303,7 @@ class NX_writer():
             azimuth_bins = self.ai.azimuth_bins if self.ai.azimuth_bins else 1
             input.create_dataset("azimuth_bins", data=azimuth_bins)
             input.create_dataset("unit", data=self.ai.unit)
-            if self.ai.mask is not None and np.any(self.ai.mask):
-                input.create_dataset("mask", data=self.ai.mask)
-            else:
-                input.create_dataset("mask", data="None")
+            input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
             
             input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
 
