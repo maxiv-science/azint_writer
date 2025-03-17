@@ -1,4 +1,4 @@
 from importlib.metadata import version
-__version__ = version('NXazint')
+__version__ = version('nxazint')
 
-from .NXazint import *
+from .nxazint import *

@@ -1,13 +1,13 @@
-# NXazint
+# nxazint
 
-**NXazint** is a Python package for writing HDF5 files in the **NXazint** format, a new extension to the [NeXus](https://www.nexusformat.org/) standard. The NXazint format is specifically designed for storing data related to azimuthal integration in diffraction experiments.
+**nxazint** is a Python package for writing HDF5 files in the **nxazint** format, a new extension to the [NeXus](https://www.nexusformat.org/) standard. The nxazint format is specifically designed for storing data related to azimuthal integration in diffraction experiments.
 
 ---
 
 ## Features
 
 - **HDF5 File Writing**: Easily generate NeXus-compliant HDF5 files.
-- **NXazint Format**: Supports the new NXazint format for azimuthal integration.
+- **nxazint Format**: Supports the new nxazint format for azimuthal integration.
 - **Customizable Configuration**: Flexible options for writing metadata and experimental data.
 - **Seamless Integration**: Compatible with existing NeXus tools and libraries.
 
@@ -18,15 +18,15 @@
 Install Azint Writer via `pip`:
 
 ```bash
-pip install NXazint
+pip install nxazint
 ```
 or `conda (mamba)`
 ```bash
-conda install -c maxiv NXazint
+conda install -c maxiv nxazint
 ```
 ---
 
-## NXazint Format
+## nxazint Format
 
 - **Experiment Metadata**: Beamline details, sample information, and experimental setup.
 - **Azimuthal Integration Data**: One-dimensional and two-dimensional (cake) integration results.
@@ -42,7 +42,7 @@ We welcome contributions to Azint Writer! Here's how you can help:
 - Create a new branch for your feature or bug fix.
 - Submit a pull request with a clear description of your changes.
 
-Please follow the NeXus standard guidelines when adding features related to NXazint.
+Please follow the NeXus standard guidelines when adding features related to nxazint.
 
 ---
 
