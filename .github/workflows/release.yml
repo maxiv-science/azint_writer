@@ -17,6 +17,7 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniforge-version: latest
+        channels: conda-forge,maxiv
     - name: Install conda-build
       shell: bash -l {0}
       run: conda install conda-build setuptools_scm boa git
@@ -44,6 +45,7 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniforge-version: latest
+        channels: conda-forge,maxiv
     - name: Install conda-build
       shell: pwsh  # Use PowerShell shell
       run: conda install conda-build setuptools_scm boa git
@@ -69,6 +71,7 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v3
       with:
         miniforge-version: latest
+        channels: conda-forge,maxiv
     - name: Install conda-build
       shell: bash -l {0}
       run: conda install conda-build setuptools_scm boa git
