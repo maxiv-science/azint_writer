@@ -31,7 +31,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: package-${{ github.job }}-${{ matrix.os }}
-        path: ${{ github.workspace }}/**/azint*.bz2
+        path: ${{ github.workspace }}/**/nxazint*.bz2
 
   build-win:
     runs-on: windows-latest
@@ -58,7 +58,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: package-${{ github.job }}
-        path: ${{ github.workspace }}/**/azint*.bz2
+        path: ${{ github.workspace }}/**/nxazint*.bz2
 
   build-mac-arm:
     runs-on: macos-14
@@ -85,4 +85,4 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: package-${{ github.job }}
-        path: ${{ github.workspace }}/**/azint*.bz2
+        path: ${{ github.workspace }}/**/nxazint*.bz2
