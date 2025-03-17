@@ -11,9 +11,7 @@ setup(
     url="https://github.com/maxiv-science/NXazint",
     packages=find_packages(),
     install_requires=[
-        "numpy",
         "h5py",
-        "fabio",
         "azint",
     ],
     classifiers=[
