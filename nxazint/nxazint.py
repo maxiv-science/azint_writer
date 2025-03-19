@@ -102,27 +102,43 @@ class NX_writer():
         source['type'] = np.string_("Synchrotron X-ray Source")
         source['probe'] = np.string_("x-ray")
         poni_file = self.ai.poni
-        with open(poni_file, "r") as pf:
+        if isinstance(self.ai.poni, str):
+            with open(poni_file, "r") as pf:
+                try:
+                    logging.info(f"Reading poni file ...")
+                    ponif = pf.read()
+                    wavelength_found = False
+                    for line in ponif.splitlines():
+                        if line.startswith("Wavelength:"):
+                            wlength_str = line.split(":")[1].strip()
+                            try:
+                                wlength = float(wlength_str)
+                                logging.info(f"From poni file: wavelength: {wlength * 1e10} Å")
+                                wavelength_found = True
+                            except ValueError as e:
+                                logging.error(f"Error converting wavelength to float: {e}")
+                                wlength = None
+                            break
+                    if not wavelength_found:
+                        logging.error("Wavelength not found in poni file.")
+                        wlength = None
+                except Exception as e:
+                    logging.error(f"Cannot open poni file: {e}")
+        elif isinstance(self.ai.poni, dict):
+            ponif = "\n".join(f"{key}: {value}" for key, value in self.ai.poni.items())
+            wavelength_found = False
             try:
-                logging.info(f"Reading poni file ...")
-                ponif = pf.read()
-                wavelength_found = False
-                for line in ponif.splitlines():
-                    if line.startswith("Wavelength:"):
-                        wlength_str = line.split(":")[1].strip()
-                        try:
-                            wlength = float(wlength_str)
-                            logging.info(f"From poni file: wavelength: {wlength * 1e10} Å")
-                            wavelength_found = True
-                        except ValueError as e:
-                            logging.error(f"Error converting wavelength to float: {e}")
-                            wlength = None
-                        break
-                if not wavelength_found:
-                    logging.error("Wavelength not found in poni file.")
-                    wlength = None
-            except Exception as e:
-                logging.error(f"Cannot open poni file: {e}")
+                wlength = float(self.ai.poni['wavelength'])
+                logging.info(f"From poni file: wavelength: {wlength * 1e10} Å")
+                wavelength_found = True
+            except ValueError as e:
+                logging.error(f"Error converting wavelength to float: {e}")
+                wlength = None
+            if not wavelength_found:
+                logging.error("Wavelength not found in poni dict.")
+                wlength = None
+        else:
+            logging.error("Provided format for poni is wrong.")
 
         # Now handle data splitting
         if self.ai.azimuth_axis is not None:
@@ -153,7 +169,7 @@ class NX_writer():
             input.attrs["NX_class"] = "NXparameters"
             dset = input.create_dataset("poni", data=ponif, track_order=True)
             dset.attrs["type"] = "NX_CHAR"
-            dset.attrs["filename"] = poni_file
+            dset.attrs["filename"] = poni_file if isinstance(self.ai.poni, str) else "Poni dict."
 
             wavelength = mono.create_dataset("wavelength", data=wlength * 1e10, track_order=True)
             wavelength.attrs["units"] = "angstrom"
@@ -372,6 +388,8 @@ class NX_writer():
                 new_dset[n] = value
 
     def get_bl_name_from_path(self, path, bl_names_enum):
+        if not isinstance(path, str):
+            return "Unknown"
         for bl_name in bl_names_enum:
             if bl_name.value.lower() in path.lower():
                 return bl_name.value
