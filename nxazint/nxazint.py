@@ -342,13 +342,13 @@ class NX_writer():
             if errors is not None:
                 data["/entry/azint2d/data/I_errors"] = self.save_divide(errors, norm)
                 errors = self.save_divide(np.sum(errors, axis=0), np.sum(norm, axis=0))
-                data["/entry/azint1d/data/I_errors"] = errors
-                data["/entry/data/I_errors"] = errors
 
         if self.ai.azimuth_axis is not None:
             data["/entry/azint1d/data/I"] = I
+            data["/entry/azint1d/data/I_errors"] = errors
         else:
             data["/entry/data/I"] = I
+            data["/entry/data/I_errors"] = errors
 
         # data = integrated_data
 
