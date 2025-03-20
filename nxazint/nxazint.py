@@ -344,20 +344,33 @@ class NX_writer():
 
     def add_data(self, integrated_data):
 
-        res, errors, norm = integrated_data
+        if len(integrated_data) == 3:
+            normalized = False
+            res, errors, norm = integrated_data
+        else:
+            normalized = True
+            res, errors = integrated_data
+        
         data = {}
         if res.ndim == 1: # must be radial bins only, no eta, ie 1d.
             I = self.save_divide(res, norm)
             if errors is not None:
-                errors = self.save_divide(errors, norm)
+                if normalized == False:
+                    errors = self.save_divide(errors, norm)
                 data["/entry/data/I_errors"] = errors
         else:  # will have eta bins
-            I = self.save_divide(np.sum(res, axis=0), np.sum(norm, axis=0))
-            cake = self.save_divide(res, norm)
+            I = np.sum(res, axis=0)
+            cake = res
+            if normalized == False:
+                I = self.save_divide(np.sum(res, axis=0), np.sum(norm, axis=0))
+                cake = self.save_divide(res, norm)
             data["/entry/azint2d/data/I"] = cake
             if errors is not None:
-                data["/entry/azint2d/data/I_errors"] = self.save_divide(errors, norm)
-                errors = self.save_divide(np.sum(errors, axis=0), np.sum(norm, axis=0))
+                if normalized == False:
+                    data["/entry/azint2d/data/I_errors"] = self.save_divide(errors, norm)
+                    errors = self.save_divide(np.sum(errors, axis=0), np.sum(norm, axis=0))
+                else:
+                    errors = np.sum(errors, axis=0)
 
         if self.ai.azimuth_axis is not None:
             data["/entry/azint1d/data/I"] = I
