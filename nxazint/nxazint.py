@@ -374,10 +374,12 @@ class NX_writer():
 
         if self.ai.azimuth_axis is not None:
             data["/entry/azint1d/data/I"] = I
-            data["/entry/azint1d/data/I_errors"] = errors
+            if errors is not None:
+                data["/entry/azint1d/data/I_errors"] = errors
         else:
             data["/entry/data/I"] = I
-            data["/entry/data/I_errors"] = errors
+            if errors is not None:
+                data["/entry/data/I_errors"] = errors
 
         # data = integrated_data
 
