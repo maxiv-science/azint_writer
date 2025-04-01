@@ -2,7 +2,6 @@ from setuptools import setup, find_packages
 
 setup(
     name="nxazint",
-    version="0.1.0",
     description="A Python package for writing azimthual Integrated HDF5 files in NeXus format",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
