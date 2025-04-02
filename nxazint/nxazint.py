@@ -70,10 +70,12 @@ class NX_writer():
             definition = entry.create_dataset("definition", data="NXazint1d")
             definition.attrs["type"] = "NX_CHAR"
         
-        entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
+        solid_angle = entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
+        solid_angle.attrs["type"] = "NX_BOOLEAN"
 
         polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
-        entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
+        polarization_applied = entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
+        polarization_applied.attrs["type"] = "NX_BOOLEAN"
 
         logging.info("solid_angle_applied and polarization_applied data sets are created")
         logging.info(f"solid_angle: {self.ai.solid_angle}")
@@ -88,6 +90,7 @@ class NX_writer():
         logging.info(f"Beamline: {bl_name}")
         
         instrument["name"] = np.string_(bl_name)
+        instrument['name'].attrs["type"] = "NX_CHAR"
 
         # Add monochromator
         mono = instrument.create_group("monochromator", track_order=True)
@@ -99,8 +102,12 @@ class NX_writer():
         source.attrs["NX_class"] = "NXsource"
         source.attrs["default"] = "name"  
         source['name'] = np.string_("MAX IV")
+        source['name'].attrs["type"] = "NX_CHAR"
         source['type'] = np.string_("Synchrotron X-ray Source")
+        source['type'].attrs["type"] = "NX_CHAR"
         source['probe'] = np.string_("x-ray")
+        source['probe'].attrs["type"] = "NX_CHAR"
+
         poni_file = self.ai.poni
         if isinstance(self.ai.poni, str):
             with open(poni_file, "r") as pf:
@@ -154,7 +161,7 @@ class NX_writer():
 
             reduction = azint1dSE.create_group("reduction", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
-            prog = reduction.create_dataset("program", data="azint-pipeline")
+            prog = reduction.create_dataset("program", data="azint")
             prog.attrs["type"] = "NX_CHAR"
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nNXazint {__version__}")
             ver.attrs["type"] = "NX_CHAR"
@@ -183,17 +190,25 @@ class NX_writer():
             wavelength2.attrs["type"] = "NX_FLOAT"
 
             input.create_dataset("n_splitting", data=self.ai.n_splitting)
-            input.create_dataset("radial_axis", data=self.ai.radial_bins)
+            input["n_splitting"].attrs["type"] = "NX_NUMBER"
+            input.create_dataset("radial_bins", data=self.ai.radial_bins)
+            input["radial_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("azimuth_bins", data=1)
+            input["azimuth_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("unit", data=self.ai.unit)    
+            input["unit"].attrs["type"] = "NX_CHAR"
             input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
+            input["mask"].attrs["type"] = "NX_CHAR"
             
             input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
+            input["solid_angle"].attrs["type"] = "NX_BOOLEAN"
 
             polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
             input.create_dataset("polarization_factor", data=polarization)
+            input["polarization_factor"].attrs["type"] = "NX_FLOAT"
             error_model = self.ai.error_model if self.ai.error_model else "None"
             input.create_dataset("error_model", data=error_model)
+            input["error_model"].attrs["type"] = "NX_CHAR"
 
 
             azint1d = azint1dSE.create_group("data")
@@ -232,17 +247,25 @@ class NX_writer():
             wavelength2.attrs["type"] = "NX_FLOAT"
 
             input.create_dataset("n_splitting", data=self.ai.n_splitting)
-            input.create_dataset("radial_axis", data=self.ai.radial_bins)
+            input["n_splitting"].attrs["type"] = "NX_NUMBER"
+            input.create_dataset("radial_bins", data=self.ai.radial_bins)
+            input["radial_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("azimuth_bins", data=self.ai.azimuth_bins)
+            input["azimuth_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("unit", data=self.ai.unit)
+            input["unit"].attrs["type"] = "NX_CHAR"
             input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
+            input["mask"].attrs["type"] = "NX_CHAR"
             
             input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
+            input["solid_angle"].attrs["type"] = "NX_BOOLEAN"
 
             polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
             input.create_dataset("polarization_factor", data=polarization)
+            input["polarization_factor"].attrs["type"] = "NX_FLOAT"
             error_model = self.ai.error_model if self.ai.error_model else "None"
             input.create_dataset("error_model", data=error_model)
+            input["error_model"].attrs["type"] = "NX_CHAR"
 
             azint2d = azint2dSE.create_group("data")
             azint2d.attrs["NX_class"] = "NXdata"
@@ -315,18 +338,26 @@ class NX_writer():
             wavelength2.attrs["type"] = "NX_FLOAT"
             
             input.create_dataset("n_splitting", data=self.ai.n_splitting)
-            input.create_dataset("radial_axis", data=self.ai.radial_bins)
+            input["n_splitting"].attrs["type"] = "NX_NUMBER"
+            input.create_dataset("radial_bins", data=self.ai.radial_bins)
+            input["radial_bins"].attrs["type"] = "NX_NUMBER"
             azimuth_bins = self.ai.azimuth_bins if self.ai.azimuth_bins else 1
             input.create_dataset("azimuth_bins", data=azimuth_bins)
+            input["azimuth_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("unit", data=self.ai.unit)
+            input["unit"].attrs["type"] = "NX_CHAR"
             input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
+            input["mask"].attrs["type"] = "NX_CHAR"
             
             input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
+            input["solid_angle"].attrs["type"] = "NX_BOOLEAN"
 
             polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
             input.create_dataset("polarization_factor", data=polarization)
+            input["polarization_factor"].attrs["type"] = "NX_FLOAT"
             error_model = self.ai.error_model if self.ai.error_model else "None"
             input.create_dataset("error_model", data=error_model)
+            input["error_model"].attrs["type"] = "NX_CHAR"
             
             azint1d = entry.create_group("data", track_order=True)
             azint1d.attrs["NX_class"] = "NXdata"
@@ -394,9 +425,11 @@ class NX_writer():
                     # I and I_error created here
                     new_dset.attrs["units"] = "arbitrary units"
                     new_dset.attrs["long_name"] = "intensity"
+                    new_dset.attrs["type"] = "NX_FLOAT"
                     if "I_error" in key:
                         new_dset.attrs["units"] = "arbitrary units"
                         new_dset.attrs["long_name"] = "estimated errors on intensity"
+                        new_dset.attrs["type"] = "NX_FLOAT"
 
                 n = new_dset.shape[0]
                 new_dset.resize(n + 1, axis=0)
@@ -412,13 +445,15 @@ class NX_writer():
 
     def write_radial_axis(self, group, unit, radial_axis, radial_bins):
         # real dataset for radial axis is always "radial axis"
-        dset = group.create_dataset("radial_axis", data=radial_axis)
+        dset = group.create_dataset("radial_axis", data=radial_axis, track_order=True)
         if unit == "q":
             dset.attrs["units"] ="1/angstrom"
             dset.attrs["long_name"] = "q"
+            dset.attrs["type"] = "NX_NUMBER"
         else:
             dset.attrs["units"] = "degrees"
             dset.attrs["long_name"] = "tth"
+            dset.attrs["type"] = "NX_NUMBER"
 
         if isinstance(radial_bins, Iterable):
             edges = radial_bins
@@ -428,11 +463,13 @@ class NX_writer():
             edges = (centres-0.5*width)
             edges = np.append(edges,edges[-1]+width)
 
-        dsete = group.create_dataset(f"radial_axis_edges", data=edges)
+        dsete = group.create_dataset(f"radial_axis_edges", data=edges, track_order=True)
         dsete.attrs["type"] = "NX_FLOAT"
         if unit == "q":
             dsete.attrs["units"] = "1/angstrom"
             dsete.attrs["long_name"] = "Edges of q bins"
+            dset.attrs["type"] = "NX_FLOAT"
         else:
             dsete.attrs["units"] = "degrees"
             dsete.attrs["long_name"] = "Edges of tth bins"
+            dset.attrs["type"] = "NX_FLOAT"
