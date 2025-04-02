@@ -384,7 +384,10 @@ class NX_writer():
         
         data = {}
         if res.ndim == 1: # must be radial bins only, no eta, ie 1d.
-            I = self.save_divide(res, norm)
+            if normalized == False:
+                I = self.save_divide(res, norm)
+            else:
+                I = res
             if errors is not None:
                 if normalized == False:
                     errors = self.save_divide(errors, norm)
@@ -409,10 +412,6 @@ class NX_writer():
                 data["/entry/azint1d/data/I_errors"] = errors
         else:
             data["/entry/data/I"] = I
-            if errors is not None:
-                data["/entry/data/I_errors"] = errors
-
-        # data = integrated_data
 
         with h5py.File(self.output_file, "r+") as fh_u:
             for key, value in data.items():
