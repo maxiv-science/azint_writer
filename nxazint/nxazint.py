@@ -53,16 +53,16 @@ class NX_writer():
         self.config = None
         with h5py.File(self.output_file, "w") as fh_w:
             self.fh = fh_w
-            if "entry" not in fh_w: # this condition can be omitted, check that
+            if "ENTRY" not in fh_w: # this condition can be omitted, check that
                 self.write_header()
         
     def write_header(self):
         logging.info(f"writing header started, azint version is {azint.__version__}")
 
-        entry = self.fh.create_group("entry", track_order=True)
+        entry = self.fh.create_group("ENTRY", track_order=True)
         entry.attrs["NX_class"] = "NXentry"
-        entry.attrs["default"] = "data" 
-        logging.debug("entry is created in the file")
+        entry.attrs["default"] = "DATA" 
+        logging.debug("ENTRY is created in the file")
 
 
         if self.ai.azimuth_axis is None:
@@ -83,7 +83,7 @@ class NX_writer():
         
 
         # Add instrument
-        instrument = entry.create_group("instrument", track_order=True)
+        instrument = entry.create_group("INSTRUMENT", track_order=True)
         instrument.attrs["NX_class"] = "NXinstrument"
         instrument.attrs["default"] = "name" 
         bl_name = self.get_bl_name_from_path(self.ai.poni, BLNames)
@@ -93,12 +93,12 @@ class NX_writer():
         instrument['name'].attrs["type"] = "NX_CHAR"
 
         # Add monochromator
-        mono = instrument.create_group("monochromator", track_order=True)
+        mono = instrument.create_group("MONOCHROMATOR", track_order=True)
         mono.attrs["NX_class"] = "NXmonochromator"
         mono.attrs["default"] = "energy"  
 
         # Add source
-        source = instrument.create_group("source", track_order=True)
+        source = instrument.create_group("SOURCE", track_order=True)
         source.attrs["NX_class"] = "NXsource"
         source.attrs["default"] = "name"  
         source['name'] = np.string_("MAX IV")
@@ -157,9 +157,9 @@ class NX_writer():
             definition = azint1dSE.create_dataset("definition", data="NXazint1d")
             definition.attrs["type"] = "NX_CHAR"
 
-            azint1dSE["instrument"] = h5py.SoftLink('/entry/instrument')
+            azint1dSE["INSTRUMENT"] = h5py.SoftLink('/ENTRY/INSTRUMENT')
 
-            reduction = azint1dSE.create_group("reduction", track_order=True)
+            reduction = azint1dSE.create_group("REDUCTION", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint")
             prog.attrs["type"] = "NX_CHAR"
@@ -211,7 +211,7 @@ class NX_writer():
             input["error_model"].attrs["type"] = "NX_CHAR"
 
 
-            azint1d = azint1dSE.create_group("data")
+            azint1d = azint1dSE.create_group("DATA")
             azint1d.attrs["NX_class"] = "NXdata"
             azint1d.attrs["signal"] = "I"
             azint1d.attrs["axes"] = [".", "radial_axis"]
@@ -224,9 +224,9 @@ class NX_writer():
             definition = azint2dSE.create_dataset("definition", data="NXazint2d")
             definition.attrs["type"] = "NX_CHAR"
 
-            azint2dSE["instrument"] = h5py.SoftLink('/entry/instrument')
+            azint2dSE["INSTRUMENT"] = h5py.SoftLink('/ENTRY/INSTRUMENT')
 
-            reduction = azint2dSE.create_group("reduction", track_order=True)
+            reduction = azint2dSE.create_group("REDUCTION", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             prog.attrs["type"] = "NX_CHAR"
@@ -272,19 +272,19 @@ class NX_writer():
             azint2d.attrs["signal"] = "I"
             azint2d.attrs["axes"] = [".", "azimuthal_axis", "radial_axis"]
             azint2d.attrs["interpretation"] = "image"
-            entry["data"] = h5py.SoftLink('/entry/azint1d/data')
+            entry["DATA"] = h5py.SoftLink('/ENTRY/azint1d/DATA')
             self.write_radial_axis(azint2d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
 
             norm = self.ai.norm.reshape(self.ai.output_shape)
             dsetnorm = azint2d.create_dataset("norm", data=norm)
             dsetnorm.attrs["units"] = "arbitrary units"
             dsetnorm.attrs["long_name"] = "normalized intensity"
-            dsetnorm.attrs["type"] = "NX_FLOAT"
+            dsetnorm.attrs["type"] = "NX_NUMBER"
 
             dset = azint2d.create_dataset("azimuthal_axis", data=self.ai.azimuth_axis)
             dset.attrs["units"] = "degrees"
             dset.attrs["long_name"] = "Azimuthal bin center"
-            dset.attrs["type"] = "NX_FLOAT"
+            dset.attrs["type"] = "NX_ANGLE"
 
             if isinstance(self.ai.azimuth_bins, Iterable):
                 aedges = self.ai.azimuth_bins
@@ -297,16 +297,16 @@ class NX_writer():
             dset2 = azint2d.create_dataset("azimuthal_axis_edges", data=aedges)
             dset2.attrs["units"] = "degrees"
             dset2.attrs["long_name"] = "Edges of azimuthal bins"
-            dset2.attrs["type"] = "NX_FLOAT"
+            dset2.attrs["type"] = "NX_ANGLE"
 
-            azint1dSE.attrs["default"] = "data"
-            azint2dSE.attrs["default"] = "data"
-            entry.attrs["default"] = "data"
+            azint1dSE.attrs["default"] = "DATA"
+            azint2dSE.attrs["default"] = "DATA"
+            entry.attrs["default"] = "DATA"
             
         else:
             logging.info(f"Creating just 1D data ...")
             # ONLY 1D DATA section
-            reduction = entry.create_group("reduction", track_order=True)
+            reduction = entry.create_group("REDUCTION", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             prog.attrs["type"] = "NX_CHAR"
@@ -359,14 +359,14 @@ class NX_writer():
             input.create_dataset("error_model", data=error_model)
             input["error_model"].attrs["type"] = "NX_CHAR"
             
-            azint1d = entry.create_group("data", track_order=True)
+            azint1d = entry.create_group("DATA", track_order=True)
             azint1d.attrs["NX_class"] = "NXdata"
             azint1d.attrs["signal"] = "I"
             azint1d.attrs["axes"] = [".", "radial_axis"]
             azint1d.attrs["interpretation"] = "spectrum"
             self.write_radial_axis(azint1d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
 
-            entry.attrs["default"] = "data"
+            entry.attrs["default"] = "DATA"
 
     
         
@@ -391,27 +391,27 @@ class NX_writer():
             if errors is not None:
                 if normalized == False:
                     errors = self.save_divide(errors, norm)
-                data["/entry/data/I_errors"] = errors
+                data["/ENTRY/DATA/I_errors"] = errors
         else:  # will have eta bins
             I = np.sum(res, axis=0)
             cake = res
             if normalized == False:
                 I = self.save_divide(np.sum(res, axis=0), np.sum(norm, axis=0))
                 cake = self.save_divide(res, norm)
-            data["/entry/azint2d/data/I"] = cake
+            data["/ENTRY/azint2d/DATA/I"] = cake
             if errors is not None:
                 if normalized == False:
-                    data["/entry/azint2d/data/I_errors"] = self.save_divide(errors, norm)
+                    data["/ENTRY/azint2d/DATA/I_errors"] = self.save_divide(errors, norm)
                     errors = self.save_divide(np.sum(errors, axis=0), np.sum(norm, axis=0))
                 else:
                     errors = np.sum(errors, axis=0)
 
         if self.ai.azimuth_axis is not None:
-            data["/entry/azint1d/data/I"] = I
+            data["/ENTRY/azint1d/DATA/I"] = I
             if errors is not None:
-                data["/entry/azint1d/data/I_errors"] = errors
+                data["/ENTRY/azint1d/DATA/I_errors"] = errors
         else:
-            data["/entry/data/I"] = I
+            data["/ENTRY/DATA/I"] = I
 
         with h5py.File(self.output_file, "r+") as fh_u:
             for key, value in data.items():
@@ -424,11 +424,9 @@ class NX_writer():
                     # I and I_error created here
                     new_dset.attrs["units"] = "arbitrary units"
                     new_dset.attrs["long_name"] = "intensity"
-                    new_dset.attrs["type"] = "NX_FLOAT"
+                    new_dset.attrs["type"] = "NX_NUMBER"
                     if "I_error" in key:
-                        new_dset.attrs["units"] = "arbitrary units"
-                        new_dset.attrs["long_name"] = "estimated errors on intensity"
-                        new_dset.attrs["type"] = "NX_FLOAT"
+                        new_dset.attrs.modify("long_name", "estimated errors on intensity")
 
                 n = new_dset.shape[0]
                 new_dset.resize(n + 1, axis=0)
@@ -445,15 +443,11 @@ class NX_writer():
     def write_radial_axis(self, group, unit, radial_axis, radial_bins):
         # real dataset for radial axis is always "radial axis"
         dset = group.create_dataset("radial_axis", data=radial_axis, track_order=True)
-        if unit == "q":
-            dset.attrs["units"] ="1/angstrom"
-            dset.attrs["long_name"] = "q"
-            dset.attrs["type"] = "NX_NUMBER"
-        else:
-            dset.attrs["units"] = "degrees"
-            dset.attrs["long_name"] = "tth"
-            dset.attrs["type"] = "NX_NUMBER"
-
+        dset.attrs["long_name"] = "q" if unit == "q" else "tth"
+        dset.attrs["units"] = "1/angstrom" if unit == "q" else "degrees"
+        dset.attrs["type"] = "NX_ANGLE"
+        
+        # Calculate edges
         if isinstance(radial_bins, Iterable):
             edges = radial_bins
         else:
@@ -462,13 +456,7 @@ class NX_writer():
             edges = (centres-0.5*width)
             edges = np.append(edges,edges[-1]+width)
 
-        dsete = group.create_dataset(f"radial_axis_edges", data=edges, track_order=True)
-        dsete.attrs["type"] = "NX_FLOAT"
-        if unit == "q":
-            dsete.attrs["units"] = "1/angstrom"
-            dsete.attrs["long_name"] = "Edges of q bins"
-            dset.attrs["type"] = "NX_FLOAT"
-        else:
-            dsete.attrs["units"] = "degrees"
-            dsete.attrs["long_name"] = "Edges of tth bins"
-            dset.attrs["type"] = "NX_FLOAT"
+        dsete = group.create_dataset("radial_axis_edges", data=edges, track_order=True)
+        dsete.attrs["long_name"] = "Edges of q bins" if unit == "q" else "Edges of tth bins"
+        dsete.attrs["units"] = "1/angstrom" if unit == "q" else "degrees"
+        dsete.attrs["type"] = "NX_ANGLE"
