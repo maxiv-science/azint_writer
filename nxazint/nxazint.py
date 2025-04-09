@@ -267,7 +267,7 @@ class NX_writer():
             input.create_dataset("error_model", data=error_model)
             input["error_model"].attrs["type"] = "NX_CHAR"
 
-            azint2d = azint2dSE.create_group("data")
+            azint2d = azint2dSE.create_group("DATA")
             azint2d.attrs["NX_class"] = "NXdata"
             azint2d.attrs["signal"] = "I"
             azint2d.attrs["axes"] = [".", "azimuthal_axis", "radial_axis"]
@@ -375,43 +375,20 @@ class NX_writer():
 
     def add_data(self, integrated_data):
 
-        if len(integrated_data) == 3:
-            normalized = False
-            res, errors, norm = integrated_data
-        else:
-            normalized = True
-            res, errors = integrated_data
-        
+        I, errors_1d, cake, errors_2d = integrated_data
         data = {}
-        if res.ndim == 1: # must be radial bins only, no eta, ie 1d.
-            if normalized == False:
-                I = self.save_divide(res, norm)
-            else:
-                I = res
-            if errors is not None:
-                if normalized == False:
-                    errors = self.save_divide(errors, norm)
-                data["/ENTRY/DATA/I_errors"] = errors
-        else:  # will have eta bins
-            I = np.sum(res, axis=0)
-            cake = res
-            if normalized == False:
-                I = self.save_divide(np.sum(res, axis=0), np.sum(norm, axis=0))
-                cake = self.save_divide(res, norm)
-            data["/ENTRY/azint2d/DATA/I"] = cake
-            if errors is not None:
-                if normalized == False:
-                    data["/ENTRY/azint2d/DATA/I_errors"] = self.save_divide(errors, norm)
-                    errors = self.save_divide(np.sum(errors, axis=0), np.sum(norm, axis=0))
-                else:
-                    errors = np.sum(errors, axis=0)
-
-        if self.ai.azimuth_axis is not None:
+        if cake is not None: # will have eta bins
             data["/ENTRY/azint1d/DATA/I"] = I
-            if errors is not None:
-                data["/ENTRY/azint1d/DATA/I_errors"] = errors
-        else:
-            data["/ENTRY/DATA/I"] = I
+            data["/ENTRY/azint2d/DATA/I"] = cake
+            data["/ENTRY/azint2d/DATA/I"] = cake
+            if errors_2d is not None:
+                data["/ENTRY/azint2d/DATA/I_errors"] = errors_2d
+            if errors_1d is not None:
+                data["/ENTRY/azint1d/DATA/I_errors"] = errors_1d
+        else:  # must be radial bins only, no eta, ie 1d.
+            if errors_1d is not None:
+                data["/ENTRY/DATA/I"] = I
+                data["/ENTRY/DATA/I_errors"] = errors_1d
 
         with h5py.File(self.output_file, "r+") as fh_u:
             for key, value in data.items():
