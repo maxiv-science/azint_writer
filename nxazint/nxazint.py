@@ -274,13 +274,6 @@ class NX_writer():
             azint2d.attrs["interpretation"] = "image"
             entry["DATA"] = h5py.SoftLink('/ENTRY/azint1d/DATA')
             self.write_radial_axis(azint2d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
-
-            norm = self.ai.norm.reshape(self.ai.output_shape)
-            dsetnorm = azint2d.create_dataset("norm", data=norm)
-            dsetnorm.attrs["units"] = "arbitrary units"
-            dsetnorm.attrs["long_name"] = "normalized intensity"
-            dsetnorm.attrs["type"] = "NX_NUMBER"
-
             dset = azint2d.create_dataset("azimuthal_axis", data=self.ai.azimuth_axis)
             dset.attrs["units"] = "degrees"
             dset.attrs["long_name"] = "Azimuthal bin center"
@@ -380,7 +373,8 @@ class NX_writer():
         if cake is not None: # will have eta bins
             data["/ENTRY/azint1d/DATA/I"] = I
             data["/ENTRY/azint2d/DATA/I"] = cake
-            data["/ENTRY/azint2d/DATA/I"] = cake
+            data["/ENTRY/azint2d/DATA/norm"] = self.ai.norm_2d
+            data["/ENTRY/azint1d/DATA/norm"] = self.ai.norm_1d
             if errors_2d is not None:
                 data["/ENTRY/azint2d/DATA/I_errors"] = errors_2d
             if errors_1d is not None:
@@ -388,6 +382,7 @@ class NX_writer():
         else:  # must be radial bins only, no eta, ie 1d.
             if errors_1d is not None:
                 data["/ENTRY/DATA/I"] = I
+                data["/ENTRY/DATA/norm"] = self.ai.norm_1d
                 data["/ENTRY/DATA/I_errors"] = errors_1d
 
         with h5py.File(self.output_file, "r+") as fh_u:
