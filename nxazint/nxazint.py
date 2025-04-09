@@ -77,6 +77,9 @@ class NX_writer():
         polarization_applied = entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
         polarization_applied.attrs["type"] = "NX_BOOLEAN"
 
+        normalization = entry.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
+        normalization.attrs["type"] = "NX_BOOLEAN"
+
         logging.info("solid_angle_applied and polarization_applied data sets are created")
         logging.info(f"solid_angle: {self.ai.solid_angle}")
         logging.info(f"polarization_factor: {self.ai.polarization_factor}")
@@ -373,16 +376,19 @@ class NX_writer():
         if cake is not None: # will have eta bins
             data["/ENTRY/azint1d/DATA/I"] = I
             data["/ENTRY/azint2d/DATA/I"] = cake
-            data["/ENTRY/azint2d/DATA/norm"] = self.ai.norm_2d
-            data["/ENTRY/azint1d/DATA/norm"] = self.ai.norm_1d
+            if self.ai.normalized:
+                data["/ENTRY/azint2d/DATA/norm"] = self.ai.norm_2d
+                data["/ENTRY/azint1d/DATA/norm"] = self.ai.norm_1d
             if errors_2d is not None:
                 data["/ENTRY/azint2d/DATA/I_errors"] = errors_2d
             if errors_1d is not None:
                 data["/ENTRY/azint1d/DATA/I_errors"] = errors_1d
         else:  # must be radial bins only, no eta, ie 1d.
+            data["/ENTRY/DATA/I"] = I
+            if self.ai.normalized:
+                data["/ENTRY/azint2d/DATA/norm"] = self.ai.norm_2d
+                data["/ENTRY/azint1d/DATA/norm"] = self.ai.norm_1d
             if errors_1d is not None:
-                data["/ENTRY/DATA/I"] = I
-                data["/ENTRY/DATA/norm"] = self.ai.norm_1d
                 data["/ENTRY/DATA/I_errors"] = errors_1d
 
         with h5py.File(self.output_file, "r+") as fh_u:
