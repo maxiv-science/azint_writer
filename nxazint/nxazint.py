@@ -386,7 +386,6 @@ class NX_writer():
         else:  # must be radial bins only, no eta, ie 1d.
             data["/ENTRY/DATA/I"] = I
             if self.ai.normalized:
-                data["/ENTRY/azint2d/DATA/norm"] = self.ai.norm_2d
                 data["/ENTRY/azint1d/DATA/norm"] = self.ai.norm_1d
             if errors_1d is not None:
                 data["/ENTRY/DATA/I_errors"] = errors_1d
