@@ -279,7 +279,7 @@ class NX_writer():
             self.write_radial_axis(azint2d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
             dset = azint2d.create_dataset("azimuthal_axis", data=self.ai.azimuth_axis)
             dset.attrs["units"] = "degrees"
-            dset.attrs["long_name"] = "Azimuthal bin center"
+            dset.attrs["long_name"] = "azimuthal bin center"
             dset.attrs["type"] = "NX_ANGLE"
 
             if isinstance(self.ai.azimuth_bins, Iterable):
@@ -292,7 +292,7 @@ class NX_writer():
 
             dset2 = azint2d.create_dataset("azimuthal_axis_edges", data=aedges)
             dset2.attrs["units"] = "degrees"
-            dset2.attrs["long_name"] = "Edges of azimuthal bins"
+            dset2.attrs["long_name"] = "azimuthal bin edges"
             dset2.attrs["type"] = "NX_ANGLE"
 
             azint1dSE.attrs["default"] = "DATA"
@@ -386,7 +386,7 @@ class NX_writer():
         else:  # must be radial bins only, no eta, ie 1d.
             data["/ENTRY/DATA/I"] = I
             if self.ai.normalized:
-                data["/ENTRY/azint1d/DATA/norm"] = self.ai.norm_1d
+                data["/ENTRY/DATA/norm"] = self.ai.norm_1d
             if errors_1d is not None:
                 data["/ENTRY/DATA/I_errors"] = errors_1d
 
@@ -404,6 +404,8 @@ class NX_writer():
                     new_dset.attrs["type"] = "NX_NUMBER"
                     if "I_error" in key:
                         new_dset.attrs.modify("long_name", "estimated errors on intensity")
+                    if "norm" in key:
+                        new_dset.attrs.modify("long_name", "number of pixels contributing to the corresponding bin")
 
                 n = new_dset.shape[0]
                 new_dset.resize(n + 1, axis=0)
@@ -420,9 +422,9 @@ class NX_writer():
     def write_radial_axis(self, group, unit, radial_axis, radial_bins):
         # real dataset for radial axis is always "radial axis"
         dset = group.create_dataset("radial_axis", data=radial_axis, track_order=True)
-        dset.attrs["long_name"] = "q" if unit == "q" else "tth"
+        dset.attrs["long_name"] = "q" if unit == "q" else "2theta"
         dset.attrs["units"] = "1/angstrom" if unit == "q" else "degrees"
-        dset.attrs["type"] = "NX_ANGLE"
+        dset.attrs["type"] = "NX_NUMBER"
         
         # Calculate edges
         if isinstance(radial_bins, Iterable):
@@ -434,6 +436,6 @@ class NX_writer():
             edges = np.append(edges,edges[-1]+width)
 
         dsete = group.create_dataset("radial_axis_edges", data=edges, track_order=True)
-        dsete.attrs["long_name"] = "Edges of q bins" if unit == "q" else "Edges of tth bins"
+        dsete.attrs["long_name"] = "q bin edges" if unit == "q" else "2theta bin edges"
         dsete.attrs["units"] = "1/angstrom" if unit == "q" else "degrees"
-        dsete.attrs["type"] = "NX_ANGLE"
+        dsete.attrs["type"] = "NX_NUMBER"
