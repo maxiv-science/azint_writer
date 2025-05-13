@@ -1,5 +1,5 @@
 package:
-  name: nxazint
+  name: azint-writer
   version: "{{ SETUPTOOLS_SCM_PRETEND_VERSION }}"
 
 source:

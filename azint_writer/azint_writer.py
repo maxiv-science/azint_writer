@@ -166,7 +166,7 @@ class NX_writer():
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint")
             prog.attrs["type"] = "NX_CHAR"
-            ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nNXazint {__version__}")
+            ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
             ver.attrs["type"] = "NX_CHAR"
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             date.attrs["type"] = "NX_DATE_TIME"
@@ -233,7 +233,7 @@ class NX_writer():
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             prog.attrs["type"] = "NX_CHAR"
-            ver = reduction.create_dataset("version", data="azint 1.1.0\nNXazint 0.0.1")
+            ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
             ver.attrs["type"] = "NX_CHAR"
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             date.attrs["type"] = "NX_DATE_TIME"
@@ -306,7 +306,7 @@ class NX_writer():
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             prog.attrs["type"] = "NX_CHAR"
-            ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nNXazint {__version__}")
+            ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
             ver.attrs["type"] = "NX_CHAR"
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             date.attrs["type"] = "NX_DATE_TIME"
