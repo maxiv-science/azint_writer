@@ -53,16 +53,16 @@ class NX_writer():
         self.config = None
         with h5py.File(self.output_file, "w") as fh_w:
             self.fh = fh_w
-            if "ENTRY" not in fh_w: # this condition can be omitted, check that
+            if "entry" not in fh_w: # this condition can be omitted, check that
                 self.write_header()
         
     def write_header(self):
         logging.info(f"writing header started, azint version is {azint.__version__}")
 
-        entry = self.fh.create_group("ENTRY", track_order=True)
+        entry = self.fh.create_group("entry", track_order=True)
         entry.attrs["NX_class"] = "NXentry"
-        entry.attrs["default"] = "DATA" 
-        logging.debug("ENTRY is created in the file")
+        entry.attrs["default"] = "data" 
+        logging.debug("entry is created in the file")
 
 
         if self.ai.azimuth_axis is None:
@@ -86,7 +86,7 @@ class NX_writer():
         
 
         # Add instrument
-        instrument = entry.create_group("INSTRUMENT", track_order=True)
+        instrument = entry.create_group("instrument", track_order=True)
         instrument.attrs["NX_class"] = "NXinstrument"
         instrument.attrs["default"] = "name" 
         bl_name = self.get_bl_name_from_path(self.ai.poni, BLNames)
@@ -96,12 +96,12 @@ class NX_writer():
         instrument['name'].attrs["type"] = "NX_CHAR"
 
         # Add monochromator
-        mono = instrument.create_group("MONOCHROMATOR", track_order=True)
+        mono = instrument.create_group("monochromator", track_order=True)
         mono.attrs["NX_class"] = "NXmonochromator"
         mono.attrs["default"] = "energy"  
 
         # Add source
-        source = instrument.create_group("SOURCE", track_order=True)
+        source = instrument.create_group("source", track_order=True)
         source.attrs["NX_class"] = "NXsource"
         source.attrs["default"] = "name"  
         source['name'] = np.string_("MAX IV")
@@ -160,9 +160,9 @@ class NX_writer():
             definition = azint1dSE.create_dataset("definition", data="NXazint1d")
             definition.attrs["type"] = "NX_CHAR"
 
-            azint1dSE["INSTRUMENT"] = h5py.SoftLink('/ENTRY/INSTRUMENT')
+            azint1dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
-            reduction = azint1dSE.create_group("REDUCTION", track_order=True)
+            reduction = azint1dSE.create_group("reduction", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint")
             prog.attrs["type"] = "NX_CHAR"
@@ -214,7 +214,7 @@ class NX_writer():
             input["error_model"].attrs["type"] = "NX_CHAR"
 
 
-            azint1d = azint1dSE.create_group("DATA")
+            azint1d = azint1dSE.create_group("data")
             azint1d.attrs["NX_class"] = "NXdata"
             azint1d.attrs["signal"] = "I"
             azint1d.attrs["axes"] = [".", "radial_axis"]
@@ -227,9 +227,9 @@ class NX_writer():
             definition = azint2dSE.create_dataset("definition", data="NXazint2d")
             definition.attrs["type"] = "NX_CHAR"
 
-            azint2dSE["INSTRUMENT"] = h5py.SoftLink('/ENTRY/INSTRUMENT')
+            azint2dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
-            reduction = azint2dSE.create_group("REDUCTION", track_order=True)
+            reduction = azint2dSE.create_group("reduction", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             prog.attrs["type"] = "NX_CHAR"
@@ -270,12 +270,12 @@ class NX_writer():
             input.create_dataset("error_model", data=error_model)
             input["error_model"].attrs["type"] = "NX_CHAR"
 
-            azint2d = azint2dSE.create_group("DATA")
+            azint2d = azint2dSE.create_group("data")
             azint2d.attrs["NX_class"] = "NXdata"
             azint2d.attrs["signal"] = "I"
             azint2d.attrs["axes"] = [".", "azimuthal_axis", "radial_axis"]
             azint2d.attrs["interpretation"] = "image"
-            entry["DATA"] = h5py.SoftLink('/ENTRY/azint1d/DATA')
+            entry["data"] = h5py.SoftLink('/entry/azint1d/data')
             self.write_radial_axis(azint2d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
             dset = azint2d.create_dataset("azimuthal_axis", data=self.ai.azimuth_axis)
             dset.attrs["units"] = "degrees"
@@ -295,14 +295,14 @@ class NX_writer():
             dset2.attrs["long_name"] = "azimuthal bin edges"
             dset2.attrs["type"] = "NX_ANGLE"
 
-            azint1dSE.attrs["default"] = "DATA"
-            azint2dSE.attrs["default"] = "DATA"
-            entry.attrs["default"] = "DATA"
+            azint1dSE.attrs["default"] = "data"
+            azint2dSE.attrs["default"] = "data"
+            entry.attrs["default"] = "data"
             
         else:
             logging.info(f"Creating just 1D data ...")
             # ONLY 1D DATA section
-            reduction = entry.create_group("REDUCTION", track_order=True)
+            reduction = entry.create_group("reduction", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             prog.attrs["type"] = "NX_CHAR"
@@ -355,14 +355,14 @@ class NX_writer():
             input.create_dataset("error_model", data=error_model)
             input["error_model"].attrs["type"] = "NX_CHAR"
             
-            azint1d = entry.create_group("DATA", track_order=True)
+            azint1d = entry.create_group("data", track_order=True)
             azint1d.attrs["NX_class"] = "NXdata"
             azint1d.attrs["signal"] = "I"
             azint1d.attrs["axes"] = [".", "radial_axis"]
             azint1d.attrs["interpretation"] = "spectrum"
             self.write_radial_axis(azint1d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
 
-            entry.attrs["default"] = "DATA"
+            entry.attrs["default"] = "data"
 
     
         
@@ -374,21 +374,21 @@ class NX_writer():
         I, errors_1d, cake, errors_2d = integrated_data
         data = {}
         if cake is not None: # will have eta bins
-            data["/ENTRY/azint1d/DATA/I"] = I
-            data["/ENTRY/azint2d/DATA/I"] = cake
+            data["/entry/azint1d/data/I"] = I
+            data["/entry/azint2d/data/I"] = cake
             if self.ai.normalized:
-                data["/ENTRY/azint2d/DATA/norm"] = self.ai.norm_2d
-                data["/ENTRY/azint1d/DATA/norm"] = self.ai.norm_1d
+                data["/entry/azint2d/data/norm"] = self.ai.norm_2d
+                data["/entry/azint1d/data/norm"] = self.ai.norm_1d
             if errors_2d is not None:
-                data["/ENTRY/azint2d/DATA/I_errors"] = errors_2d
+                data["/entry/azint2d/data/I_errors"] = errors_2d
             if errors_1d is not None:
-                data["/ENTRY/azint1d/DATA/I_errors"] = errors_1d
+                data["/entry/azint1d/data/I_errors"] = errors_1d
         else:  # must be radial bins only, no eta, ie 1d.
-            data["/ENTRY/DATA/I"] = I
+            data["/entry/data/I"] = I
             if self.ai.normalized:
-                data["/ENTRY/DATA/norm"] = self.ai.norm_1d
+                data["/entry/data/norm"] = self.ai.norm_1d
             if errors_1d is not None:
-                data["/ENTRY/DATA/I_errors"] = errors_1d
+                data["/entry/data/I_errors"] = errors_1d
 
         with h5py.File(self.output_file, "r+") as fh_u:
             for key, value in data.items():
