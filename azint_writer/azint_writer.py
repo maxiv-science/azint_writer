@@ -68,17 +68,13 @@ class NX_writer():
         if self.ai.azimuth_axis is None:
             logging.info("azimuth_axis is None, creating NXazint1d")
             definition = entry.create_dataset("definition", data="NXazint1d")
-            definition.attrs["type"] = "NX_CHAR"
         
         solid_angle = entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
-        solid_angle.attrs["type"] = "NX_BOOLEAN"
 
         polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
         polarization_applied = entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
-        polarization_applied.attrs["type"] = "NX_BOOLEAN"
 
         normalization = entry.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
-        normalization.attrs["type"] = "NX_BOOLEAN"
 
         logging.info("solid_angle_applied and polarization_applied data sets are created")
         logging.info(f"solid_angle: {self.ai.solid_angle}")
@@ -93,7 +89,6 @@ class NX_writer():
         logging.info(f"Beamline: {bl_name}")
         
         instrument["name"] = np.string_(bl_name)
-        instrument['name'].attrs["type"] = "NX_CHAR"
 
         # Add monochromator
         mono = instrument.create_group("monochromator", track_order=True)
@@ -105,11 +100,8 @@ class NX_writer():
         source.attrs["NX_class"] = "NXsource"
         source.attrs["default"] = "name"  
         source['name'] = np.string_("MAX IV")
-        source['name'].attrs["type"] = "NX_CHAR"
         source['type'] = np.string_("Synchrotron X-ray Source")
-        source['type'].attrs["type"] = "NX_CHAR"
         source['probe'] = np.string_("x-ray")
-        source['probe'].attrs["type"] = "NX_CHAR"
 
         poni_file = self.ai.poni
         if isinstance(self.ai.poni, str):
@@ -158,60 +150,42 @@ class NX_writer():
             azint1dSE.attrs["NX_class"] = "NXsubentry"
 
             definition = azint1dSE.create_dataset("definition", data="NXazint1d")
-            definition.attrs["type"] = "NX_CHAR"
 
             azint1dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
             reduction = azint1dSE.create_group("reduction", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint")
-            prog.attrs["type"] = "NX_CHAR"
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
-            ver.attrs["type"] = "NX_CHAR"
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
-            date.attrs["type"] = "NX_DATE_TIME"
             ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
-            ref.attrs["type"] = "NX_CHAR"
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
-            note.attrs["type"] = "NX_CHAR"
 
             input = reduction.create_group("input", track_order=True)
             input.attrs["NX_class"] = "NXparameters"
             dset = input.create_dataset("poni", data=ponif, track_order=True)
-            dset.attrs["type"] = "NX_CHAR"
             dset.attrs["filename"] = poni_file if isinstance(self.ai.poni, str) else "Poni dict."
 
             wavelength = mono.create_dataset("wavelength", data=wlength * 1e10, track_order=True)
             wavelength.attrs["units"] = "angstrom"
-            wavelength.attrs["type"] = "NX_FLOAT"
             energy = mono.create_dataset("energy", data=(1.2398 * 1e-9) / wlength, track_order=True)
             energy.attrs["units"] = "keV"
-            energy.attrs["type"] = "NX_FLOAT"
 
             wavelength2 = input.create_dataset("wavelength", data=wlength * 1e10)
             wavelength2.attrs["units"] = "angstrom"
-            wavelength2.attrs["type"] = "NX_FLOAT"
 
             input.create_dataset("n_splitting", data=self.ai.n_splitting)
-            input["n_splitting"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("radial_bins", data=self.ai.radial_bins)
-            input["radial_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("azimuth_bins", data=1)
-            input["azimuth_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("unit", data=self.ai.unit)    
-            input["unit"].attrs["type"] = "NX_CHAR"
             input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
-            input["mask"].attrs["type"] = "NX_CHAR"
             
             input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
-            input["solid_angle"].attrs["type"] = "NX_BOOLEAN"
 
             polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
             input.create_dataset("polarization_factor", data=polarization)
-            input["polarization_factor"].attrs["type"] = "NX_FLOAT"
             error_model = self.ai.error_model if self.ai.error_model else "None"
             input.create_dataset("error_model", data=error_model)
-            input["error_model"].attrs["type"] = "NX_CHAR"
 
 
             azint1d = azint1dSE.create_group("data")
@@ -225,50 +199,35 @@ class NX_writer():
             azint2dSE.attrs["NX_class"] = "NXsubentry"
 
             definition = azint2dSE.create_dataset("definition", data="NXazint2d")
-            definition.attrs["type"] = "NX_CHAR"
 
             azint2dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
             reduction = azint2dSE.create_group("reduction", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
-            prog.attrs["type"] = "NX_CHAR"
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
-            ver.attrs["type"] = "NX_CHAR"
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
-            date.attrs["type"] = "NX_DATE_TIME"
             ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
-            ref.attrs["type"] = "NX_CHAR"
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
-            note.attrs["type"] = "NX_CHAR"
 
             input = reduction.create_group("input", track_order=True)
             input.attrs["NX_class"] = "NXparameters"
 
             wavelength2 = input.create_dataset("wavelength", data=wlength * 1e10)
             wavelength2.attrs["units"] = "angstrom"
-            wavelength2.attrs["type"] = "NX_FLOAT"
 
             input.create_dataset("n_splitting", data=self.ai.n_splitting)
-            input["n_splitting"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("radial_bins", data=self.ai.radial_bins)
-            input["radial_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("azimuth_bins", data=self.ai.azimuth_bins)
-            input["azimuth_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("unit", data=self.ai.unit)
-            input["unit"].attrs["type"] = "NX_CHAR"
             input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
-            input["mask"].attrs["type"] = "NX_CHAR"
             
             input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
-            input["solid_angle"].attrs["type"] = "NX_BOOLEAN"
 
             polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
             input.create_dataset("polarization_factor", data=polarization)
-            input["polarization_factor"].attrs["type"] = "NX_FLOAT"
             error_model = self.ai.error_model if self.ai.error_model else "None"
             input.create_dataset("error_model", data=error_model)
-            input["error_model"].attrs["type"] = "NX_CHAR"
 
             azint2d = azint2dSE.create_group("data")
             azint2d.attrs["NX_class"] = "NXdata"
@@ -280,7 +239,6 @@ class NX_writer():
             dset = azint2d.create_dataset("azimuthal_axis", data=self.ai.azimuth_axis)
             dset.attrs["units"] = "degrees"
             dset.attrs["long_name"] = "azimuthal bin center"
-            dset.attrs["type"] = "NX_ANGLE"
 
             if isinstance(self.ai.azimuth_bins, Iterable):
                 aedges = self.ai.azimuth_bins
@@ -293,7 +251,6 @@ class NX_writer():
             dset2 = azint2d.create_dataset("azimuthal_axis_edges", data=aedges)
             dset2.attrs["units"] = "degrees"
             dset2.attrs["long_name"] = "azimuthal bin edges"
-            dset2.attrs["type"] = "NX_ANGLE"
 
             azint1dSE.attrs["default"] = "data"
             azint2dSE.attrs["default"] = "data"
@@ -305,55 +262,38 @@ class NX_writer():
             reduction = entry.create_group("reduction", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
-            prog.attrs["type"] = "NX_CHAR"
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
-            ver.attrs["type"] = "NX_CHAR"
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
-            date.attrs["type"] = "NX_DATE_TIME"
             ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
-            ref.attrs["type"] = "NX_CHAR"
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
-            note.attrs["type"] = "NX_CHAR"
 
             input = reduction.create_group("input", track_order=True)
             input.attrs["NX_class"] = "NXparameters"
             dset = input.create_dataset("poni", data=ponif, track_order=True)
-            dset.attrs["type"] = "NX_CHAR"
             dset.attrs["filename"] = poni_file
             # Add wavelength and energy to mono
             wavelength = mono.create_dataset("wavelength", data=wlength * 1e10, track_order=True)
             wavelength.attrs["units"] = "angstrom"
-            wavelength.attrs["type"] = "NX_FLOAT"
             energy = mono.create_dataset("energy", data=(1.2398 * 1e-9) / wlength, track_order=True)
             energy.attrs["units"] = "keV"
-            energy.attrs["type"] = "NX_FLOAT"
         
             # Add other info from poni to input
             wavelength2 = input.create_dataset("wavelength", data=wlength * 1e10)     
             wavelength2.attrs["units"] = "angstrom"
-            wavelength2.attrs["type"] = "NX_FLOAT"
             
             input.create_dataset("n_splitting", data=self.ai.n_splitting)
-            input["n_splitting"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("radial_bins", data=self.ai.radial_bins)
-            input["radial_bins"].attrs["type"] = "NX_NUMBER"
             azimuth_bins = self.ai.azimuth_bins if self.ai.azimuth_bins else 1
             input.create_dataset("azimuth_bins", data=azimuth_bins)
-            input["azimuth_bins"].attrs["type"] = "NX_NUMBER"
             input.create_dataset("unit", data=self.ai.unit)
-            input["unit"].attrs["type"] = "NX_CHAR"
             input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
-            input["mask"].attrs["type"] = "NX_CHAR"
             
             input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
-            input["solid_angle"].attrs["type"] = "NX_BOOLEAN"
 
             polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
             input.create_dataset("polarization_factor", data=polarization)
-            input["polarization_factor"].attrs["type"] = "NX_FLOAT"
             error_model = self.ai.error_model if self.ai.error_model else "None"
             input.create_dataset("error_model", data=error_model)
-            input["error_model"].attrs["type"] = "NX_CHAR"
             
             azint1d = entry.create_group("data", track_order=True)
             azint1d.attrs["NX_class"] = "NXdata"
@@ -401,7 +341,6 @@ class NX_writer():
                     # I and I_error created here
                     new_dset.attrs["units"] = "arbitrary units"
                     new_dset.attrs["long_name"] = "intensity"
-                    new_dset.attrs["type"] = "NX_NUMBER"
                     if "I_error" in key:
                         new_dset.attrs.modify("long_name", "estimated errors on intensity")
                     if "norm" in key:
@@ -424,7 +363,6 @@ class NX_writer():
         dset = group.create_dataset("radial_axis", data=radial_axis, track_order=True)
         dset.attrs["long_name"] = "q" if unit == "q" else "2theta"
         dset.attrs["units"] = "1/angstrom" if unit == "q" else "degrees"
-        dset.attrs["type"] = "NX_NUMBER"
         
         # Calculate edges
         if isinstance(radial_bins, Iterable):
@@ -438,4 +376,3 @@ class NX_writer():
         dsete = group.create_dataset("radial_axis_edges", data=edges, track_order=True)
         dsete.attrs["long_name"] = "q bin edges" if unit == "q" else "2theta bin edges"
         dsete.attrs["units"] = "1/angstrom" if unit == "q" else "degrees"
-        dsete.attrs["type"] = "NX_NUMBER"
