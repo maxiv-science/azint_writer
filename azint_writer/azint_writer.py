@@ -26,31 +26,47 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-class BLNames(Enum):
-    BALDER = "Balder"
-    BIOMAX = "BioMAX"
-    BLOCH = "Bloch"
-    COSAXS = "CoSAXS"
-    DANMAX = "DanMAX"
-    FEMTOMAX = "FemtoMAX"
-    FINEST = "FinEst"
-    FLEXPES = "FlexPES"
-    FORMAX = "ForMAX"
-    HIPPIE = "HIPPIE"
-    MAXPEEM = "MAXPEEM"
-    MICROMAX = "MicroMAX"
-    NANOMAX = "NanoMAX"
-    SEDSMAX = "SedsMAX"
-    SOFTIMAX = "SoftiMAX"
-    SPECIES = "SPECIES"
-    VERITAS = "Veritas"
+# class BLNames(Enum):
+#     BALDER = "Balder"
+#     BIOMAX = "BioMAX"
+#     BLOCH = "Bloch"
+#     COSAXS = "CoSAXS"
+#     DANMAX = "DanMAX"
+#     FEMTOMAX = "FemtoMAX"
+#     FINEST = "FinEst"
+#     FLEXPES = "FlexPES"
+#     FORMAX = "ForMAX"
+#     HIPPIE = "HIPPIE"
+#     MAXPEEM = "MAXPEEM"
+#     MICROMAX = "MicroMAX"
+#     NANOMAX = "NanoMAX"
+#     SEDSMAX = "SedsMAX"
+#     SOFTIMAX = "SoftiMAX"
+#     SPECIES = "SPECIES"
+#     VERITAS = "Veritas"
 
-class NX_writer():
-    def __init__(self, ai, output_file):
+
+class NXWriter:
+    def __init__(
+        self, 
+        ai, 
+        output_file,
+        write_1d=True, 
+        write_2d=True, 
+        instrument_name=None, 
+        source_name=None, 
+        source_type=None, 
+        source_probe=None
+    ):
         self.ai = ai
         self.output_file = output_file
-        self.fh = None
-        self.config = None
+        self.write_1d = write_1d
+        self.write_2d = write_2d
+        self.instrument_name = instrument_name
+        self.source_name = source_name
+        self.source_type = source_type
+        self.source_probe = source_probe
+
         with h5py.File(self.output_file, "w") as fh_w:
             self.fh = fh_w
             if "entry" not in fh_w: # this condition can be omitted, check that
@@ -65,9 +81,9 @@ class NX_writer():
         logging.debug("entry is created in the file")
 
 
-        if self.ai.azimuth_axis is None:
-            logging.info("azimuth_axis is None, creating NXazint1d")
-            definition = entry.create_dataset("definition", data="NXazint1d")
+        if not (self.write_1d and self.write_2d):
+            logging.info(f"Creating {'NXazint1d' if self.write_1d else 'NXazint2d'}")
+            definition = entry.create_dataset("definition", data='NXazint1d' if self.write_1d else 'NXazint2d')       
         
         solid_angle = entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
 
@@ -85,10 +101,10 @@ class NX_writer():
         instrument = entry.create_group("instrument", track_order=True)
         instrument.attrs["NX_class"] = "NXinstrument"
         instrument.attrs["default"] = "name" 
-        bl_name = self.get_bl_name_from_path(self.ai.poni, BLNames)
-        logging.info(f"Beamline: {bl_name}")
+        # bl_name = self.get_bl_name_from_path(self.ai.poni, BLNames)
+        logging.info(f"Instrument: {self.instrument_name}")
         
-        instrument["name"] = np.string_(bl_name)
+        instrument["name"] = np.string_(self.instrument_name)
 
         # Add monochromator
         mono = instrument.create_group("monochromator", track_order=True)
@@ -98,10 +114,10 @@ class NX_writer():
         # Add source
         source = instrument.create_group("source", track_order=True)
         source.attrs["NX_class"] = "NXsource"
-        source.attrs["default"] = "name"  
-        source['name'] = np.string_("MAX IV")
-        source['type'] = np.string_("Synchrotron X-ray Source")
-        source['probe'] = np.string_("x-ray")
+        source.attrs["default"] = "name" 
+        source['name'] = self.source_name
+        source['type'] = self.source_type
+        source['probe'] = self.source_type
 
         poni_file = self.ai.poni
         if isinstance(self.ai.poni, str):
@@ -143,8 +159,10 @@ class NX_writer():
             logging.error("Provided format for poni is wrong.")
 
         # Now handle data splitting
-        if self.ai.azimuth_axis is not None:
+        if (self.write_1d and self.write_2d):
             logging.info(f"Creating 1D and 2D data ...")
+            if self.ai.azimuth_axis is None:
+                logging.error("2d data is not available.")
             # 1D data subentry
             azint1dSE = entry.create_group("azint1d", track_order=True)
             azint1dSE.attrs["NX_class"] = "NXsubentry"
@@ -256,7 +274,7 @@ class NX_writer():
             azint2dSE.attrs["default"] = "data"
             entry.attrs["default"] = "data"
             
-        else:
+        elif self.write_1d:
             logging.info(f"Creating just 1D data ...")
             # ONLY 1D DATA section
             reduction = entry.create_group("reduction", track_order=True)
@@ -303,6 +321,69 @@ class NX_writer():
             self.write_radial_axis(azint1d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
 
             entry.attrs["default"] = "data"
+        
+        elif self.write_2d:
+            logging.info(f"Creating just 2D data ...")
+            # ONLY 2D DATA section
+            reduction = entry.create_group("reduction", track_order=True)
+            reduction.attrs["NX_class"] = "NXprocess"
+            prog = reduction.create_dataset("program", data="azint-pipeline")
+            ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
+            date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
+            ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
+            note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
+
+            input = reduction.create_group("input", track_order=True)
+            input.attrs["NX_class"] = "NXparameters"
+            dset = input.create_dataset("poni", data=ponif, track_order=True)
+            dset.attrs["filename"] = poni_file
+            # Add wavelength and energy to mono
+            wavelength = mono.create_dataset("wavelength", data=wlength * 1e10, track_order=True)
+            wavelength.attrs["units"] = "angstrom"
+            energy = mono.create_dataset("energy", data=(1.2398 * 1e-9) / wlength, track_order=True)
+            energy.attrs["units"] = "keV"
+        
+            # Add other info from poni to input
+            wavelength2 = input.create_dataset("wavelength", data=wlength * 1e10)     
+            wavelength2.attrs["units"] = "angstrom"
+            
+            input.create_dataset("n_splitting", data=self.ai.n_splitting)
+            input.create_dataset("radial_bins", data=self.ai.radial_bins)
+            azimuth_bins = self.ai.azimuth_bins
+            input.create_dataset("azimuth_bins", data=azimuth_bins)
+            input.create_dataset("unit", data=self.ai.unit)
+            input.create_dataset("mask", data=self.ai.mask_path if self.ai.mask_path else ("A numpy array was provided" if self.ai.mask is not None else "None"))
+            
+            input.create_dataset("solid_angle", data=True if self.ai.solid_angle else False)
+
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
+            input.create_dataset("polarization_factor", data=polarization)
+            error_model = self.ai.error_model if self.ai.error_model else "None"
+            input.create_dataset("error_model", data=error_model)
+            
+            azint2d = entry.create_group("data", track_order=True)
+            azint2d.attrs["NX_class"] = "NXdata"
+            azint2d.attrs["signal"] = "I"
+            azint2d.attrs["axes"] = [".", "azimuthal_axis", "radial_axis"]
+            azint2d.attrs["interpretation"] = "image"
+            self.write_radial_axis(azint2d, self.ai.unit, self.ai.radial_axis, self.ai.radial_bins)
+            dset = azint2d.create_dataset("azimuthal_axis", data=self.ai.azimuth_axis)
+            dset.attrs["units"] = "degrees"
+            dset.attrs["long_name"] = "azimuthal bin center"
+
+            if isinstance(self.ai.azimuth_bins, Iterable):
+                aedges = self.ai.azimuth_bins
+            else:
+                acentres = self.ai.azimuth_axis
+                awidth = acentres[1] - acentres[0]
+                aedges = (acentres - 0.5 * awidth)
+                aedges = np.append(aedges, aedges[-1] + awidth)
+
+            dset2 = azint2d.create_dataset("azimuthal_axis_edges", data=aedges)
+            dset2.attrs["units"] = "degrees"
+            dset2.attrs["long_name"] = "azimuthal bin edges"
+
+            entry.attrs["default"] = "data"
 
     
         
@@ -313,7 +394,8 @@ class NX_writer():
 
         I, errors_1d, cake, errors_2d = integrated_data
         data = {}
-        if cake is not None: # will have eta bins
+        if (self.write_1d and self.write_2d):
+        # if cake is not None: # will have eta bins
             data["/entry/azint1d/data/I"] = I
             data["/entry/azint2d/data/I"] = cake
             if self.ai.normalized:
@@ -323,12 +405,20 @@ class NX_writer():
                 data["/entry/azint2d/data/I_errors"] = errors_2d
             if errors_1d is not None:
                 data["/entry/azint1d/data/I_errors"] = errors_1d
-        else:  # must be radial bins only, no eta, ie 1d.
+        elif self.write_1d:  # must be radial bins only, no eta, ie 1d.
             data["/entry/data/I"] = I
             if self.ai.normalized:
                 data["/entry/data/norm"] = self.ai.norm_1d
             if errors_1d is not None:
                 data["/entry/data/I_errors"] = errors_1d
+        elif self.write_2d:
+            data["/entry/data/I"] = cake
+            if self.ai.normalized:
+                data["/entry/data/norm"] = self.ai.norm_2d
+            if errors_2d is not None:
+                data["/entry/data/I_errors"] = errors_2d
+        else:
+            logging.error(f"At least one of 1D or 2D should be written")
 
         with h5py.File(self.output_file, "r+") as fh_u:
             for key, value in data.items():
