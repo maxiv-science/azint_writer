@@ -1,17 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Azint Writer</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>azint-writer Documentation</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js for syntax highlighting -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+    rel="stylesheet"
+  />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <!-- Your external CSS -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Azint Writer</h1>
-  <textarea id="inputText" rows="10" cols="50">Write here...</textarea>
-  <br>
-  <button onclick="convertToAZINT()">Convert to AZINT</button>
-  <pre id="outputText"></pre>
+  <h1>azint-writer</h1>
 
-  <script src="azint-writer.js"></script>
+  <p><strong>azint-writer</strong> is a Python package for writing HDF5 files in the <strong>azint-writer</strong> format, a new extension to the <a href="https://www.nexusformat.org/" target="_blank" rel="noopener noreferrer">NeXus</a> standard. The azint-writer format is specifically designed for storing data related to azimuthal integration in diffraction experiments.</p>
+
+  <hr />
+
+  <h2>Features</h2>
+  <ul>
+    <li><strong>HDF5 File Writing</strong>: Easily generate NeXus-compliant HDF5 files.</li>
+    <li><strong>azint-writer Format</strong>: Supports the new azint-writer format for azimuthal integration.</li>
+    <li><strong>Customizable Configuration</strong>: Flexible options for writing metadata and experimental data.</li>
+    <li><strong>Seamless Integration</strong>: Compatible with existing NeXus tools and libraries.</li>
+  </ul>
+
+  <hr />
+
+  <h2>Installation</h2>
+  <p>Install Azint Writer via <code>conda</code>:</p>
+  <pre><code>conda install -c maxiv azint-writer</code></pre>
+
+  <hr />
+
+  <h2>azint-writer Format</h2>
+  <ul>
+    <li><strong>Experiment Metadata</strong>: Beamline details, sample information, and experimental setup.</li>
+    <li><strong>Azimuthal Integration Data</strong>: One-dimensional and two-dimensional (cake) integration results.</li>
+    <li><strong>Calibration Information</strong>: Detector geometry and calibration parameters.</li>
+  </ul>
+  <p>For more details on the NeXus standard, see the NeXus documentation.</p>
+
+  <hr />
+
+  <h2>Example Usage</h2>
+  
+  
+<p>Here is a sample Python snippet using azint-writer:</p>
+<pre><code>
+<span class="keyword">import</span> azint, azint_writer, h5py
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+<span class="keyword">h5name</span> = <span class="string">"lab6-lab6_6_master.h5"</span>
+h = h5py.File(h5name, <span class="string">'r'</span>)
+img = h[<span class="string">'/entry/data/data_000001'</span>][<span class="number">0</span>]
+poni = <span class="string">'78.poni'</span>
+msk = np.zeros(img.shape, dtype=np.uint8)  <span class="comment"># a np array</span>
+
+config = <span class="brackets">{</span>
+    <span class="dict-key">'poni'</span>: poni,
+    <span class="dict-key">'mask'</span>: msk,
+    <span class="dict-key">'radial_bins'</span>: <span class="number">500</span>,
+    <span class="dict-key">'azimuth_bins'</span>: <span class="number">180</span>,
+    <span class="dict-key">'n_splitting'</span>: <span class="number">2</span>,
+    <span class="dict-key">'error_model'</span>: <span class="string">'poisson'</span>,
+    <span class="dict-key">'solid_angle'</span>: <span class="keyword">True</span>,
+    <span class="dict-key">'polarization_factor'</span>: <span class="number">0.99997</span>,
+    <span class="dict-key">'normalized'</span>: <span class="keyword">True</span>,
+    <span class="dict-key">'unit'</span>: <span class="string">'2th'</span>,
+<span class="brackets">}</span>
+
+ai = <span class="function">azint.AzimuthalIntegrator</span>(**config)
+data = ai.integrate(img)
+
+init_writer_config = <span class="brackets">{</span>
+    <span class="dict-key">'ai'</span>: ai,
+    <span class="dict-key">'output_file'</span>: <span class="string">'nxazin_2D.h5'</span>,
+    <span class="dict-key">'write_1d'</span>: <span class="keyword">False</span>,
+    <span class="dict-key">'write_2d'</span>: <span class="keyword">True</span>,
+    <span class="dict-key">'instrument_name'</span>: <span class="string">'DanMAX'</span>,
+    <span class="dict-key">'source_name'</span>: <span class="string">'MAX IV'</span>,
+    <span class="dict-key">'source_type'</span>: <span class="string">'Synchrotron X-ray Source'</span>,
+    <span class="dict-key">'source_probe'</span>: <span class="string">'x-ray'</span>,
+<span class="brackets">}</span>
+
+nx = <span class="function">azint_writer.NXWriter</span>(**init_writer_config)
+nx.add_data(data)
+</code></pre>
+
+  <hr />
+
+  <h2>Contributing</h2>
+  <p>We welcome contributions to Azint Writer! Here's how you can help:</p>
+  <ul>
+    <li>Fork the repository.</li>
+    <li>Create a new branch for your feature or bug fix.</li>
+    <li>Submit a pull request with a clear description of your changes.</li>
+  </ul>
+  <p>Please follow the NeXus standard guidelines when adding features related to azint-writer.</p>
+
+  <hr />
+
+  <h2>License</h2>
+  <p>This project is licensed under the MIT License. See the LICENSE file for details.</p>
+
+  <hr />
+
+  <h2>Support</h2>
+  <p>If you encounter any issues or have questions, feel free to open an issue on GitHub.</p>
 </body>
 </html>

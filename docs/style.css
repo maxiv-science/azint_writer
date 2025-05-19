@@ -1,17 +1,105 @@
+/* Reset & base */
+* {
+  box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 2rem;
-    background-color: #f4f4f4;
-  }
-  
-  textarea {
-    width: 100%;
-    font-size: 1rem;
-  }
-  
-  button {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-  }
-  
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background: #fafafa;
+  color: #333333;
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem 4rem;
+  line-height: 1.6;
+}
+
+a {
+  color: #007acc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  font-weight: 700;
+  font-size: 3rem;
+  margin-bottom: 0.2em;
+  color: #005a9e;
+  text-align: center;
+}
+
+h2 {
+  font-weight: 600;
+  border-bottom: 2px solid #d1d5db;
+  padding-bottom: 0.3em;
+  margin-top: 3em;
+  margin-bottom: 1em;
+  color: #007acc;
+}
+
+hr {
+  border: none;
+  border-bottom: 1px solid #d1d5db;
+  margin: 3em 0;
+  opacity: 0.5;
+}
+
+ul {
+  list-style: inside disc;
+  margin-left: 0;
+  padding-left: 0;
+  color: #555555;
+}
+
+ul li {
+  margin-bottom: 0.6em;
+}
+
+p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #a0a0c0;
+}
+
+pre code {
+  background-color: #21252b !important;
+  color: #abb2bf !important;
+  font-family: 'Source Code Pro', monospace !important;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: block;
+  overflow-x: auto;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+pre code .keyword { color: #c678dd; font-weight: 700; }
+pre code .string { color: #98c379; }
+pre code .number { color: #d19a66; }
+pre code .comment { color: #5c6370; font-style: italic; }
+pre code .function { color: #61afef; }
+pre code .brackets { color: #56b6c2; }
+pre code .operator { color: #56b6c2; }
+pre code .dict-key { color: #e06c75; }
+pre code .module { color: #dcdcaa; font-style: italic; }
+/* Highlight keywords and builtins for Python */
+.language-python .keyword {
+  color: #c586c0;
+  font-weight: 700;
+}
+.language-python .string {
+  color: #ce9178;
+}
+.language-python .number {
+  color: #b5cea8;
+}
+.language-python .function {
+  color: #dcdcaa;
+}
+.language-python .comment {
+  color: #6a9955;
+  font-style: italic;
+}
