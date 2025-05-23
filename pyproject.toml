@@ -1,6 +1,0 @@
-[build-system]
-requires = ['setuptools>=60', 'wheel', 'setuptools_scm>=8.0']
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools_scm]
-write_to = 'azint_writer/_version.py'
