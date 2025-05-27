@@ -364,7 +364,7 @@
   
   
   <span class="md-ellipsis">
-    azint
+    azint_writer
     
   </span>
   
@@ -488,7 +488,10 @@
 
 
 <h1 id="nexus-azint-writer">NeXus azint writer</h1>
-<p><strong>azint-writer</strong> is a Python package for writing HDF5 files in the <strong>NXazint1d</strong> or <strong>NXazint2d</strong> format, a new extension to the <a href="https://www.nexusformat.org/">NeXus</a> standard. The NXazint1d (NXazint2d) format is specifically designed for storing data related to azimuthal integration in diffraction experiments.</p>
+<p><strong>azint-writer</strong> is a Python package for writing HDF5 files in the <a href="https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint1d.html">NXazint1d</a> or <a href="https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint2d.html">NXazint2d</a> format, a new extension to the <a href="https://www.nexusformat.org/">NeXus</a> standard. The NXazint1d (NXazint2d) format is specifically designed for storing data related to azimuthal integration in diffraction experiments.</p>
+<blockquote>
+<p><strong>Note:</strong> The <strong>azint-writer</strong> package is currently coupled to the <a href="https://maxiv-science.github.io/azint/"><code>azint</code></a> library for performing azimuthal integration. While this provides tight integration and ease of use within the MAX IV ecosystem, support for <a href="https://pyfai.readthedocs.io/">pyFAI</a>—a widely used library for azimuthal integration—is planned, and future versions of <strong>azint-writer</strong> are expected to work directly with pyFAI as well.</p>
+</blockquote>
 <h2 id="features">Features</h2>
 <ul>
 <li><strong>HDF5 File Writing</strong>: Easily generate NeXus-compliant HDF5 files.</li>
@@ -508,45 +511,60 @@
 </ul>
 <p>For more information about the NeXus standard, see the <a href="https://www.nexusformat.org/">official documentation</a>.</p>
 <h2 id="example-usage">Example Usage</h2>
-<p>Here is a sample Python snippet using <strong>azint-writer</strong>:</p>
+<p>Here is a sample Python snippet using <strong>azint-writer</strong>:
+(<a href="https://zenodo.org/records/15525054?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjExNjFhMTJhLWQwMjItNDllMy1iMWJjLTM1MTljZDg0YTFmMCIsImRhdGEiOnt9LCJyYW5kb20iOiI5MGU3ZmVjYzM2ODJkMDdjYWNkMThhMDAyNGM5NzMwOSJ9.Yj-aspIfrIt0QsLvRKcG9AA9Kiyfd2YXdIpwaDnaVZc-ArJRVtXgTh5iPuoiCLC2mv2XmeRrAP8NmzRult8vGw">link</a> to file examples)</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">azint</span><span class="o">,</span><span class="w"> </span><span class="nn">azint_writer</span><span class="o">,</span><span class="w"> </span><span class="nn">h5py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="n">h5name</span> <span class="o">=</span> <span class="s2">&quot;lab6-lab6_6_master.h5&quot;</span>
+<span class="c1"># Open the HDF5 file containing detector data</span>
+<span class="n">h5name</span> <span class="o">=</span> <span class="s2">&quot;scan-1560_pilatus.h5&quot;</span>
 <span class="n">h</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">h5name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-<span class="n">img</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="s1">&#39;/entry/data/data_000001&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">poni</span> <span class="o">=</span> <span class="s1">&#39;78.poni&#39;</span>
-<span class="n">msk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>  <span class="c1"># a NumPy array</span>
 
+<span class="c1"># Read the first image frame from the dataset</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="s1">&#39;/entry/instrument/pilatus/data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Specify the PONI file (detector geometry calibration)</span>
+<span class="n">poni</span> <span class="o">=</span> <span class="s1">&#39;35keV_605mm.poni&#39;</span>
+
+<span class="c1"># Create a mask with the same shape as the image</span>
+<span class="n">mask</span> <span class="o">=</span> <span class="s1">&#39;35keV_605mm_mask.npy&#39;</span>
+
+<span class="c1"># Configuration for the azimuthal integration</span>
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;poni&#39;</span><span class="p">:</span> <span class="n">poni</span><span class="p">,</span>
-    <span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">msk</span><span class="p">,</span>
-    <span class="s1">&#39;radial_bins&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
-    <span class="s1">&#39;azimuth_bins&#39;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span>
-    <span class="s1">&#39;n_splitting&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s1">&#39;error_model&#39;</span><span class="p">:</span> <span class="s1">&#39;poisson&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;solid_angle&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s1">&#39;polarization_factor&#39;</span><span class="p">:</span> <span class="mf">0.99997</span><span class="p">,</span>
-    <span class="s1">&#39;normalized&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;2th&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;poni&#39;</span><span class="p">:</span> <span class="n">poni</span><span class="p">,</span>                      <span class="c1"># Path to the PONI file</span>
+    <span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span>                      <span class="c1"># Mask to ignore bad pixels</span>
+    <span class="s1">&#39;radial_bins&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>                <span class="c1"># Number of radial bins for integration</span>
+    <span class="s1">&#39;azimuth_bins&#39;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span>               <span class="c1"># Number of azimuthal bins (for 2D integration)</span>
+    <span class="s1">&#39;n_splitting&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                  <span class="c1"># Number of subdivisions per pixel (for precision)</span>
+    <span class="s1">&#39;error_model&#39;</span><span class="p">:</span> <span class="s1">&#39;poisson&#39;</span><span class="p">,</span>          <span class="c1"># Error propagation model</span>
+    <span class="s1">&#39;solid_angle&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>               <span class="c1"># Apply solid angle correction</span>
+    <span class="s1">&#39;polarization_factor&#39;</span><span class="p">:</span> <span class="mf">0.99997</span><span class="p">,</span>    <span class="c1"># Correction for polarization effects</span>
+    <span class="s1">&#39;normalized&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                <span class="c1"># Normalize the output intensities</span>
+    <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;2th&#39;</span><span class="p">,</span>                     <span class="c1"># Output units (e.g., 2θ)</span>
 <span class="p">}</span>
 
+<span class="c1"># Create the azimuthal integrator instance using azint</span>
 <span class="n">ai</span> <span class="o">=</span> <span class="n">azint</span><span class="o">.</span><span class="n">AzimuthalIntegrator</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Perform the azimuthal integration on the image</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
 
+<span class="c1"># Configuration for the NXWriter (NeXus HDF5 file writer)</span>
 <span class="n">init_writer_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;ai&#39;</span><span class="p">:</span> <span class="n">ai</span><span class="p">,</span>
-    <span class="s1">&#39;output_file&#39;</span><span class="p">:</span> <span class="s1">&#39;nxazin_2D.h5&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;write_1d&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;write_2d&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s1">&#39;instrument_name&#39;</span><span class="p">:</span> <span class="s1">&#39;DanMAX&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;source_name&#39;</span><span class="p">:</span> <span class="s1">&#39;MAX IV&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;source_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Synchrotron X-ray Source&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;source_probe&#39;</span><span class="p">:</span> <span class="s1">&#39;x-ray&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ai&#39;</span><span class="p">:</span> <span class="n">ai</span><span class="p">,</span>                          <span class="c1"># AzimuthalIntegrator instance</span>
+    <span class="s1">&#39;output_file&#39;</span><span class="p">:</span> <span class="s1">&#39;nxazin_2D.h5&#39;</span><span class="p">,</span>     <span class="c1"># Output file name</span>
+    <span class="s1">&#39;write_1d&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># Whether to write 1D integration data</span>
+    <span class="s1">&#39;write_2d&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                  <span class="c1"># Whether to write 2D (cake) integration data</span>
+    <span class="s1">&#39;instrument_name&#39;</span><span class="p">:</span> <span class="s1">&#39;DanMAX&#39;</span><span class="p">,</span>       <span class="c1"># Name of the beamline or instrument</span>
+    <span class="s1">&#39;source_name&#39;</span><span class="p">:</span> <span class="s1">&#39;MAX IV&#39;</span><span class="p">,</span>           <span class="c1"># Name of the facility or source</span>
+    <span class="s1">&#39;source_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Synchrotron X-ray Source&#39;</span><span class="p">,</span>  <span class="c1"># Type of source</span>
+    <span class="s1">&#39;source_probe&#39;</span><span class="p">:</span> <span class="s1">&#39;x-ray&#39;</span><span class="p">,</span>           <span class="c1"># Type of probe used (e.g., x-ray, neutron)</span>
 <span class="p">}</span>
 
+<span class="c1"># Create the NXWriter instance and write the data to the file</span>
 <span class="n">nx</span> <span class="o">=</span> <span class="n">azint_writer</span><span class="o">.</span><span class="n">NXWriter</span><span class="p">(</span><span class="o">**</span><span class="n">init_writer_config</span><span class="p">)</span>
-<span class="n">nx</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="c1"># Add the integrated data to the file</span>
+<span class="n">nx</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  
 </code></pre></div>
 <h2 id="contributing">Contributing</h2>
 <p>We welcome and encourage contributions to <strong>azint-writer</strong>! Here's how you can get involved:</p>
