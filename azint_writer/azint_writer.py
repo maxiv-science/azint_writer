@@ -26,25 +26,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-# class BLNames(Enum):
-#     BALDER = "Balder"
-#     BIOMAX = "BioMAX"
-#     BLOCH = "Bloch"
-#     COSAXS = "CoSAXS"
-#     DANMAX = "DanMAX"
-#     FEMTOMAX = "FemtoMAX"
-#     FINEST = "FinEst"
-#     FLEXPES = "FlexPES"
-#     FORMAX = "ForMAX"
-#     HIPPIE = "HIPPIE"
-#     MAXPEEM = "MAXPEEM"
-#     MICROMAX = "MicroMAX"
-#     NANOMAX = "NanoMAX"
-#     SEDSMAX = "SedsMAX"
-#     SOFTIMAX = "SoftiMAX"
-#     SPECIES = "SPECIES"
-#     VERITAS = "Veritas"
-
 
 class NXWriter:
     """
@@ -131,7 +112,6 @@ class NXWriter:
         instrument = entry.create_group("instrument", track_order=True)
         instrument.attrs["NX_class"] = "NXinstrument"
         instrument.attrs["default"] = "name" 
-        # bl_name = self.get_bl_name_from_path(self.ai.poni, BLNames)
         logging.info(f"Instrument: {self.instrument_name}")
         
         instrument["name"] = np.string_(self.instrument_name)
@@ -415,11 +395,6 @@ class NXWriter:
 
             entry.attrs["default"] = "data"
 
-    
-        
-    def save_divide(self, a, b):
-        return np.divide(a, b, out=np.zeros_like(a), where=b!=0.0)
-
     def add_data(self, integrated_data):
         """
         Add azimuthal integration data to the HDF5 file under the proper NXdata group.
@@ -479,14 +454,6 @@ class NXWriter:
                 n = new_dset.shape[0]
                 new_dset.resize(n + 1, axis=0)
                 new_dset[n] = value
-
-    def get_bl_name_from_path(self, path, bl_names_enum):
-        if not isinstance(path, str):
-            return "Unknown"
-        for bl_name in bl_names_enum:
-            if bl_name.value.lower() in path.lower():
-                return bl_name.value
-        return "Unknown"
 
     def write_radial_axis(self, group, unit, radial_axis, radial_bins):
         # real dataset for radial axis is always "radial axis"
