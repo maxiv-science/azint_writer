@@ -1,1 +1,1 @@
-::: azint-writer.azint-writer
+::: azint_writer.azint_writer

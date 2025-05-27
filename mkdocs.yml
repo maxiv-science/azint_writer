@@ -21,4 +21,4 @@ plugins:
 nav:
   - Home: index.md
   - Code Reference:
-    - azint: class-reference.md
+    - azint_writer: class-reference.md
