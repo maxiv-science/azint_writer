@@ -29,12 +29,29 @@ logging.basicConfig(
 
 class NXWriter:
     """
-    A writer class for creating and populating NeXus-compliant HDF5 files
-    with 1D and/or 2D azimuthal integration data.
+    NXWriter class for writing azimuthal integration data to NeXus HDF5 files.
+    This class handles the creation of the NeXus hierarchy, including metadata
+    such as instrument configuration, source details, monochromator properties,
+    and integration parameters. It supports both 1D and 2D data formats, allowing
+    for flexible data storage and retrieval.
 
-    This class builds the NeXus hierarchy with required metadata for azimuthal 
-    intensity analysis (NXazint1d, NXazint2d) and supports writing headers, input 
-    parameters, instrument metadata, and output data (intensity and errors).
+    Attributes:
+        - ai: Azimuthal integrator object (should contain integration results and parameters)
+        - output_file (str): Path to output HDF5 file
+        - write_1d (bool): Whether to include 1D data in the file
+        - write_2d (bool): Whether to include 2D data in the file
+        - instrument_name (str): Name of the instrument
+        - source_name (str): Name of the source
+        - source_type (str): Type of the source (e.g., 'Synchrotron')
+        - source_probe (str): Type of probe (e.g., 'x-ray')
+
+    Methods:
+        - write_header: Creates and writes the NeXus hierarchy for the dataset,
+          including metadata such as instrument configuration, source details,
+          monochromator properties, and integration parameters.
+        - add_data: Adds azimuthal integration data to the HDF5 file under the
+          proper NXdata group.
+        - write_radial_axis: Writes radial axis information to the specified group.
     """
 
     def __init__(
@@ -56,19 +73,6 @@ class NXWriter:
         self.source_name = source_name
         self.source_type = source_type
         self.source_probe = source_probe
-        """
-        Initialize the NXWriter instance and optionally write NeXus header.
-
-        Parameters:
-        - ai: Azimuthal integrator object (should contain integration results and parameters)
-        - output_file (str): Path to output HDF5 file
-        - write_1d (bool): Whether to include 1D data in the file
-        - write_2d (bool): Whether to include 2D data in the file
-        - instrument_name (str): Name of the instrument
-        - source_name (str): Name of the source
-        - source_type (str): Type of the source (e.g., 'Synchrotron')
-        - source_probe (str): Type of probe (e.g., 'x-ray')
-        """
 
         with h5py.File(self.output_file, "w") as fh_w:
             self.fh = fh_w
