@@ -26,27 +26,34 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-# class BLNames(Enum):
-#     BALDER = "Balder"
-#     BIOMAX = "BioMAX"
-#     BLOCH = "Bloch"
-#     COSAXS = "CoSAXS"
-#     DANMAX = "DanMAX"
-#     FEMTOMAX = "FemtoMAX"
-#     FINEST = "FinEst"
-#     FLEXPES = "FlexPES"
-#     FORMAX = "ForMAX"
-#     HIPPIE = "HIPPIE"
-#     MAXPEEM = "MAXPEEM"
-#     MICROMAX = "MicroMAX"
-#     NANOMAX = "NanoMAX"
-#     SEDSMAX = "SedsMAX"
-#     SOFTIMAX = "SoftiMAX"
-#     SPECIES = "SPECIES"
-#     VERITAS = "Veritas"
-
 
 class NXWriter:
+    """
+    NXWriter class for writing azimuthal integration data to NeXus HDF5 files.
+    This class handles the creation of the NeXus hierarchy, including metadata
+    such as instrument configuration, source details, monochromator properties,
+    and integration parameters. It supports both 1D and 2D data formats, allowing
+    for flexible data storage and retrieval.
+
+    Attributes:
+        - ai: Azimuthal integrator object (should contain integration results and parameters)
+        - output_file (str): Path to output HDF5 file
+        - write_1d (bool): Whether to include 1D data in the file
+        - write_2d (bool): Whether to include 2D data in the file
+        - instrument_name (str): Name of the instrument
+        - source_name (str): Name of the source
+        - source_type (str): Type of the source (e.g., 'Synchrotron')
+        - source_probe (str): Type of probe (e.g., 'x-ray')
+
+    Methods:
+        - write_header: Creates and writes the NeXus hierarchy for the dataset,
+          including metadata such as instrument configuration, source details,
+          monochromator properties, and integration parameters.
+        - add_data: Adds azimuthal integration data to the HDF5 file under the
+          proper NXdata group.
+        - write_radial_axis: Writes radial axis information to the specified group.
+    """
+
     def __init__(
         self, 
         ai, 
@@ -73,6 +80,14 @@ class NXWriter:
                 self.write_header()
         
     def write_header(self):
+        """
+        Creates and writes the NeXus hierarchy for the dataset,
+        including metadata such as instrument configuration, 
+        source details, monochromator properties, and integration parameters.
+
+        This method will automatically determine what type(s) of data 
+        (1D/2D) are to be written and populate corresponding subentries.
+        """
         logging.info(f"writing header started, azint version is {azint.__version__}")
 
         entry = self.fh.create_group("entry", track_order=True)
@@ -101,7 +116,6 @@ class NXWriter:
         instrument = entry.create_group("instrument", track_order=True)
         instrument.attrs["NX_class"] = "NXinstrument"
         instrument.attrs["default"] = "name" 
-        # bl_name = self.get_bl_name_from_path(self.ai.poni, BLNames)
         logging.info(f"Instrument: {self.instrument_name}")
         
         instrument["name"] = np.string_(self.instrument_name)
@@ -385,12 +399,17 @@ class NXWriter:
 
             entry.attrs["default"] = "data"
 
-    
-        
-    def save_divide(self, a, b):
-        return np.divide(a, b, out=np.zeros_like(a), where=b!=0.0)
-
     def add_data(self, integrated_data):
+        """
+        Add azimuthal integration data to the HDF5 file under the proper NXdata group.
+
+        Parameters:
+        - integrated_data (tuple): Tuple of form (I, errors_1d, cake, errors_2d), where:
+            - I: 1D intensity array
+            - errors_1d: 1D error array
+            - cake: 2D intensity array
+            - errors_2d: 2D error array
+        """
 
         I, errors_1d, cake, errors_2d = integrated_data
         data = {}
@@ -439,14 +458,6 @@ class NXWriter:
                 n = new_dset.shape[0]
                 new_dset.resize(n + 1, axis=0)
                 new_dset[n] = value
-
-    def get_bl_name_from_path(self, path, bl_names_enum):
-        if not isinstance(path, str):
-            return "Unknown"
-        for bl_name in bl_names_enum:
-            if bl_name.value.lower() in path.lower():
-                return bl_name.value
-        return "Unknown"
 
     def write_radial_axis(self, group, unit, radial_axis, radial_bins):
         # real dataset for radial axis is always "radial axis"
