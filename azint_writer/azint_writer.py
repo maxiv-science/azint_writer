@@ -47,6 +47,15 @@ logging.basicConfig(
 
 
 class NXWriter:
+    """
+    A writer class for creating and populating NeXus-compliant HDF5 files
+    with 1D and/or 2D azimuthal integration data.
+
+    This class builds the NeXus hierarchy with required metadata for azimuthal 
+    intensity analysis (NXazint1d, NXazint2d) and supports writing headers, input 
+    parameters, instrument metadata, and output data (intensity and errors).
+    """
+
     def __init__(
         self, 
         ai, 
@@ -66,6 +75,19 @@ class NXWriter:
         self.source_name = source_name
         self.source_type = source_type
         self.source_probe = source_probe
+        """
+        Initialize the NXWriter instance and optionally write NeXus header.
+
+        Parameters:
+        - ai: Azimuthal integrator object (should contain integration results and parameters)
+        - output_file (str): Path to output HDF5 file
+        - write_1d (bool): Whether to include 1D data in the file
+        - write_2d (bool): Whether to include 2D data in the file
+        - instrument_name (str): Name of the instrument
+        - source_name (str): Name of the source
+        - source_type (str): Type of the source (e.g., 'Synchrotron')
+        - source_probe (str): Type of probe (e.g., 'x-ray')
+        """
 
         with h5py.File(self.output_file, "w") as fh_w:
             self.fh = fh_w
@@ -73,6 +95,14 @@ class NXWriter:
                 self.write_header()
         
     def write_header(self):
+        """
+        Creates and writes the NeXus hierarchy for the dataset,
+        including metadata such as instrument configuration, 
+        source details, monochromator properties, and integration parameters.
+
+        This method will automatically determine what type(s) of data 
+        (1D/2D) are to be written and populate corresponding subentries.
+        """
         logging.info(f"writing header started, azint version is {azint.__version__}")
 
         entry = self.fh.create_group("entry", track_order=True)
@@ -391,6 +421,16 @@ class NXWriter:
         return np.divide(a, b, out=np.zeros_like(a), where=b!=0.0)
 
     def add_data(self, integrated_data):
+        """
+        Add azimuthal integration data to the HDF5 file under the proper NXdata group.
+
+        Parameters:
+        - integrated_data (tuple): Tuple of form (I, errors_1d, cake, errors_2d), where:
+            - I: 1D intensity array
+            - errors_1d: 1D error array
+            - cake: 2D intensity array
+            - errors_2d: 2D error array
+        """
 
         I, errors_1d, cake, errors_2d = integrated_data
         data = {}
