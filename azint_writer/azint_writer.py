@@ -131,7 +131,7 @@ class NXWriter:
         source.attrs["default"] = "name" 
         source['name'] = self.source_name
         source['type'] = self.source_type
-        source['probe'] = self.source_type
+        source['probe'] = self.source_probe
 
         poni_file = self.ai.poni
         if isinstance(self.ai.poni, str):
