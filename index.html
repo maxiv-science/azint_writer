@@ -519,7 +519,7 @@
 <span class="c1"># Open the HDF5 file containing detector data</span>
 <span class="n">h5name</span> <span class="o">=</span> <span class="s2">&quot;scan-1737_pilatus.h5&quot;</span>
 <span class="n">h</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">h5name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-<span class="c1"># Read the first image frame from the dataset</span>
+<span class="c1"># Read the an image frame from the dataset</span>
 <span class="n">img</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="s1">&#39;/entry/instrument/pilatus/data&#39;</span><span class="p">][</span><span class="mi">10</span><span class="p">]</span>
 <span class="c1"># Specify the PONI file (detector geometry calibration)</span>
 <span class="n">poni</span> <span class="o">=</span> <span class="s1">&#39;Si_135mm.poni&#39;</span>
