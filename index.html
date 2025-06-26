@@ -488,9 +488,9 @@
 
 
 <h1 id="nexus-azint-writer">NeXus azint writer</h1>
-<p><a href="https://maxiv-science.github.io/azint_writer/"><code>azint-writer</code></a> is a Python package for writing HDF5 files in the <a href="https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint1d.html">NXazint1d</a> or <a href="https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint2d.html">NXazint2d</a> format, a new extension to the <a href="https://www.nexusformat.org/">NeXus</a> standard. The NXazint1d (NXazint2d) format is specifically designed for storing data related to azimuthal integration in diffraction experiments.</p>
+<p><a href="https://github.com/maxiv-science/azint_writer"><code>azint-writer</code></a> is a Python package for writing HDF5 files in the <a href="https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint1d.html">NXazint1d</a> or <a href="https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint2d.html">NXazint2d</a> format, a new extension to the <a href="https://www.nexusformat.org/">NeXus</a> standard. The NXazint1d (NXazint2d) format is specifically designed for storing data related to azimuthal integration in diffraction experiments.</p>
 <blockquote>
-<p><strong>Note:</strong> The <strong>azint-writer</strong> package is currently coupled to the <a href="https://maxiv-science.github.io/azint/"><code>azint</code></a> library for performing azimuthal integration.</p>
+<p><strong>Note:</strong> The <strong>azint-writer</strong> package is currently coupled to the <a href="https://github.com/maxiv-science/azint"><code>azint</code></a> library for performing azimuthal integration.</p>
 </blockquote>
 <h2 id="features">Features</h2>
 <ul>
@@ -531,12 +531,12 @@
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;poni&#39;</span><span class="p">:</span> <span class="n">poni</span><span class="p">,</span>                      <span class="c1"># Path to the PONI file</span>
     <span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span>                      <span class="c1"># Mask to ignore bad pixels</span>
-    <span class="s1">&#39;radial_bins&#39;</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>                <span class="c1"># Number of radial bins for integration</span>
+    <span class="s1">&#39;radial_bins&#39;</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>               <span class="c1"># Number of radial bins for integration</span>
     <span class="s1">&#39;azimuth_bins&#39;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span> <span class="c1"># or None     # Number of azimuthal bins (for 2D integration)</span>
-    <span class="s1">&#39;n_splitting&#39;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span>                  <span class="c1"># Number of subdivisions per pixel (for precision)</span>
+    <span class="s1">&#39;n_splitting&#39;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span>                 <span class="c1"># Number of subdivisions per pixel (for precision)</span>
     <span class="s1">&#39;error_model&#39;</span><span class="p">:</span> <span class="s1">&#39;poisson&#39;</span><span class="p">,</span>          <span class="c1"># Error propagation model</span>
     <span class="s1">&#39;solid_angle&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>               <span class="c1"># Apply solid angle correction</span>
-    <span class="s1">&#39;polarization_factor&#39;</span><span class="p">:</span> <span class="mf">0.965</span><span class="p">,</span>    <span class="c1"># Correction for polarization effects</span>
+    <span class="s1">&#39;polarization_factor&#39;</span><span class="p">:</span> <span class="mf">0.965</span><span class="p">,</span>      <span class="c1"># Correction for polarization effects</span>
     <span class="s1">&#39;normalized&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                <span class="c1"># Normalize the output intensities</span>
     <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;2th&#39;</span><span class="p">,</span>                     <span class="c1"># Output units (e.g., 2θ)</span>
 <span class="p">}</span>
