@@ -538,7 +538,7 @@
     <span class="s1">&#39;solid_angle&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>               <span class="c1"># Apply solid angle correction</span>
     <span class="s1">&#39;polarization_factor&#39;</span><span class="p">:</span> <span class="mf">0.965</span><span class="p">,</span>      <span class="c1"># Correction for polarization effects</span>
     <span class="s1">&#39;normalized&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                <span class="c1"># Normalize the output intensities</span>
-    <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;2th&#39;</span><span class="p">,</span>                     <span class="c1"># Output units (e.g., 2θ)</span>
+    <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;2th&#39;</span><span class="p">,</span>   <span class="c1"># or q            # Output units (e.g., 2θ, q)</span>
 <span class="p">}</span>
 <span class="c1"># Create the azimuthal integrator instance using azint</span>
 <span class="n">ai</span> <span class="o">=</span> <span class="n">azint</span><span class="o">.</span><span class="n">AzimuthalIntegrator</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>

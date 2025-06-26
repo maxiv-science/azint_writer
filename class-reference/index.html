@@ -1086,7 +1086,8 @@ proper NXdata group.</p>
 <span class="normal">476</span>
 <span class="normal">477</span>
 <span class="normal">478</span>
-<span class="normal">479</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NXWriter</span><span class="p">:</span>
+<span class="normal">479</span>
+<span class="normal">480</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NXWriter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    NXWriter class for writing azimuthal integration data to NeXus HDF5 files.</span>
 <span class="sd">    This class handles the creation of the NeXus hierarchy, including metadata</span>
@@ -1106,12 +1107,13 @@ proper NXdata group.</p>
 
 <span class="sd">    Methods:</span>
 <span class="sd">        - write_header: Creates and writes the NeXus hierarchy for the dataset,</span>
-<span class="sd">          including metadata such as instrument configuration, source details,</span>
-<span class="sd">          monochromator properties, and integration parameters.</span>
+<span class="sd">            including metadata such as instrument configuration, source details,</span>
+<span class="sd">            monochromator properties, and integration parameters.</span>
 <span class="sd">        - add_data: Adds azimuthal integration data to the HDF5 file under the</span>
-<span class="sd">          proper NXdata group.</span>
+<span class="sd">            proper NXdata group.</span>
 <span class="sd">        - write_radial_axis: Writes radial axis information to the specified group.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> 
@@ -1576,8 +1578,7 @@ proper NXdata group.</p>
 
             <details class="quote">
               <summary>Source code in <code>azint_writer/azint_writer.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">402</span>
-<span class="normal">403</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">403</span>
 <span class="normal">404</span>
 <span class="normal">405</span>
 <span class="normal">406</span>
@@ -1634,7 +1635,8 @@ proper NXdata group.</p>
 <span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span>
-<span class="normal">460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integrated_data</span><span class="p">):</span>
+<span class="normal">460</span>
+<span class="normal">461</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integrated_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add azimuthal integration data to the HDF5 file under the proper NXdata group.</span>
 
@@ -1719,8 +1721,7 @@ source details, monochromator properties, and integration parameters.</p>
 
             <details class="quote">
               <summary>Source code in <code>azint_writer/azint_writer.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 82</span>
-<span class="normal"> 83</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 83</span>
 <span class="normal"> 84</span>
 <span class="normal"> 85</span>
 <span class="normal"> 86</span>
@@ -2037,7 +2038,8 @@ source details, monochromator properties, and integration parameters.</p>
 <span class="normal">397</span>
 <span class="normal">398</span>
 <span class="normal">399</span>
-<span class="normal">400</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">400</span>
+<span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates and writes the NeXus hierarchy for the dataset,</span>
 <span class="sd">    including metadata such as instrument configuration, </span>
