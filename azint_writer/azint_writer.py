@@ -100,16 +100,17 @@ class NXWriter:
             logging.info(f"Creating {'NXazint1d' if self.write_1d else 'NXazint2d'}")
             definition = entry.create_dataset("definition", data='NXazint1d' if self.write_1d else 'NXazint2d')       
         
-        solid_angle = entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
+            solid_angle = entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
 
-        polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
-        polarization_applied = entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
+            polarization_applied = entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
 
-        normalization = entry.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
+            normalization = entry.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
+            # monitor = entry.create_dataset("monitor_applied", data=True if self.ai.normalized else False)
 
-        logging.info("solid_angle_applied and polarization_applied data sets are created")
-        logging.info(f"solid_angle: {self.ai.solid_angle}")
-        logging.info(f"polarization_factor: {self.ai.polarization_factor}")
+            logging.info("solid_angle_applied and polarization_applied data sets are created")
+            logging.info(f"solid_angle: {self.ai.solid_angle}")
+            logging.info(f"polarization_factor: {self.ai.polarization_factor}")
         
 
         # Add instrument
@@ -182,6 +183,15 @@ class NXWriter:
             azint1dSE.attrs["NX_class"] = "NXsubentry"
 
             definition = azint1dSE.create_dataset("definition", data="NXazint1d")
+                 
+        
+            solid_angle = azint1dSE.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
+
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
+            polarization_applied = azint1dSE.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
+
+            normalization = azint1dSE.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
+            # monitor = azint1dSE.create_dataset("monitor_applied", data=True if self.ai.normalized else False)
 
             azint1dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
@@ -231,6 +241,15 @@ class NXWriter:
             azint2dSE.attrs["NX_class"] = "NXsubentry"
 
             definition = azint2dSE.create_dataset("definition", data="NXazint2d")
+                 
+        
+            solid_angle = azint2dSE.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
+
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
+            polarization_applied = azint2dSE.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
+
+            normalization = azint2dSE.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
+            # monitor = azint2dSE.create_dataset("monitor_applied", data=True if self.ai.normalized else False)
 
             azint2dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
