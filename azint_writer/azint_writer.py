@@ -106,7 +106,7 @@ class NXWriter:
             polarization_applied = entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
 
             normalization = entry.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
-            # monitor = entry.create_dataset("monitor_applied", data=True if self.ai.normalized else False)
+            monitor = entry.create_dataset("monitor_applied", data=False)
 
             logging.info("solid_angle_applied and polarization_applied data sets are created")
             logging.info(f"solid_angle: {self.ai.solid_angle}")
@@ -191,7 +191,7 @@ class NXWriter:
             polarization_applied = azint1dSE.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
 
             normalization = azint1dSE.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
-            # monitor = azint1dSE.create_dataset("monitor_applied", data=True if self.ai.normalized else False)
+            monitor = azint1dSE.create_dataset("monitor_applied", data=False)
 
             azint1dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
@@ -249,7 +249,7 @@ class NXWriter:
             polarization_applied = azint2dSE.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
 
             normalization = azint2dSE.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
-            # monitor = azint2dSE.create_dataset("monitor_applied", data=True if self.ai.normalized else False)
+            monitor = azint2dSE.create_dataset("monitor_applied", data=False)
 
             azint2dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
@@ -504,3 +504,51 @@ class NXWriter:
         dsete = group.create_dataset("radial_axis_edges", data=edges, track_order=True)
         dsete.attrs["long_name"] = "q bin edges" if unit == "q" else "2theta bin edges"
         dsete.attrs["units"] = "1/angstrom" if unit == "q" else "degrees"
+
+def add_monitor(h5file, monitor_data):
+    """
+    Add or update a 'monitor' group with a 'data' dataset in a NeXus HDF5 file.
+
+    This function checks for the existence of specific groups in the NeXus file
+    and inserts monitor data into `/entry/monitor` if `/entry/definition` exists,
+    or into `/entry/azint1d/monitor` and `/entry/azint2d/monitor` otherwise.
+
+    If the 'monitor' group or 'data' dataset already exists, they are reused or
+    updated. If the shape of the existing dataset differs from the new data, it
+    is deleted and recreated.
+
+    Parameters
+    ----------
+    h5file : str
+        Path to the HDF5 (.nxs) file to be modified.
+    monitor_data : array-like
+        NumPy array or array-like object containing monitor signal data to write.
+    """
+
+    with h5py.File(h5file, "r+") as fh_u:
+        if "/entry/definition" in fh_u:
+            entry_paths = ["entry"]
+        else:
+            entry_paths = ["entry/azint1d", "entry/azint2d"]
+
+        for entry_path in entry_paths:
+            try:
+                # Get or create the monitor group
+                monitor = fh_u.require_group(f"{entry_path}/monitor")
+                monitor.attrs["NX_class"] = np.string_("NXmonitor")
+
+                # Check if 'data' exists and update if possible
+                if "data" in monitor:
+                    dset = monitor["data"]
+                    if dset.shape == monitor_data.shape:
+                        dset[...] = monitor_data  # overwrite in place
+                    else:
+                        del monitor["data"]
+                        monitor.create_dataset("data", data=monitor_data, track_order=True)
+                else:
+                    monitor.create_dataset("data", data=monitor_data, track_order=True)
+                fh_u[entry_path]["monitor_applied"][...] = True
+
+                logging.info(f"Monitor data added to {entry_path}/monitor")
+            except Exception as e:
+                logging.error(f"Error handling monitor data at {entry_path}: {e}")
