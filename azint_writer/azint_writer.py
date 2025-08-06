@@ -432,37 +432,44 @@ class NXWriter:
 
         I, errors_1d, cake, errors_2d = integrated_data
         data = {}
-        if (self.write_1d and self.write_2d):
-        # if cake is not None: # will have eta bins
-            data["/entry/azint1d/data/I"] = I
-            data["/entry/azint2d/data/I"] = cake
-            if self.ai.normalized:
-                data["/entry/azint2d/data/norm"] = self.ai.norm_2d
-                data["/entry/azint1d/data/norm"] = self.ai.norm_1d
-            if errors_2d is not None:
-                data["/entry/azint2d/data/I_errors"] = errors_2d
-            if errors_1d is not None:
-                data["/entry/azint1d/data/I_errors"] = errors_1d
-        elif self.write_1d:  # must be radial bins only, no eta, ie 1d.
-            data["/entry/data/I"] = I
-            if self.ai.normalized:
-                data["/entry/data/norm"] = self.ai.norm_1d
-            if errors_1d is not None:
-                data["/entry/data/I_errors"] = errors_1d
-        elif self.write_2d:
-            data["/entry/data/I"] = cake
-            if self.ai.normalized:
-                data["/entry/data/norm"] = self.ai.norm_2d
-            if errors_2d is not None:
-                data["/entry/data/I_errors"] = errors_2d
-        else:
-            logging.error(f"At least one of 1D or 2D should be written")
-
         with h5py.File(self.output_file, "r+") as fh_u:
+            if (self.write_1d and self.write_2d):
+            # if cake is not None: # will have eta bins
+                data["/entry/azint1d/data/I"] = I
+                data["/entry/azint2d/data/I"] = cake
+                if self.ai.normalized:
+                    if "/entry/azint2d/data/norm" not in fh_u:
+                        data["/entry/azint2d/data/norm"] = self.ai.norm_2d
+                    if "/entry/azint1d/data/norm" not in fh_u:
+                        data["/entry/azint1d/data/norm"] = self.ai.norm_1d
+                if errors_2d is not None:
+                    data["/entry/azint2d/data/I_errors"] = errors_2d
+                if errors_1d is not None:
+                    data["/entry/azint1d/data/I_errors"] = errors_1d
+            elif self.write_1d:  # must be radial bins only, no eta, ie 1d.
+                data["/entry/data/I"] = I
+                if self.ai.normalized:
+                    if "/entry/data/norm" not in fh_u:
+                        data["/entry/data/norm"] = self.ai.norm_1d
+                if errors_1d is not None:
+                    data["/entry/data/I_errors"] = errors_1d
+            elif self.write_2d:
+                data["/entry/data/I"] = cake
+                if self.ai.normalized:
+                    if "/entry/data/norm" not in fh_u:
+                        data["/entry/data/norm"] = self.ai.norm_2d
+                if errors_2d is not None:
+                    data["/entry/data/I_errors"] = errors_2d
+            else:
+                logging.error(f"At least one of 1D or 2D should be written")
+
             for key, value in data.items():
                 new_dset = fh_u.get(key)
                 if not new_dset:
-                    new_dset = fh_u.create_dataset(key, dtype=value.dtype,
+                    if "norm" in key:
+                        new_dset = fh_u.create_dataset(key, data=value, track_order=True)
+                    else:
+                        new_dset = fh_u.create_dataset(key, dtype=value.dtype,
                                                    shape=(0, *value.shape),
                                                    maxshape=(None, *value.shape),
                                                    chunks=(1, *value.shape))
@@ -474,9 +481,10 @@ class NXWriter:
                     if "norm" in key:
                         new_dset.attrs.modify("long_name", "number of pixels contributing to the corresponding bin")
 
-                n = new_dset.shape[0]
-                new_dset.resize(n + 1, axis=0)
-                new_dset[n] = value
+                if "norm" not in key:
+                    n = new_dset.shape[0]
+                    new_dset.resize(n + 1, axis=0)
+                    new_dset[n] = value
 
     def write_radial_axis(self, group, unit, radial_axis, radial_bins):
         # real dataset for radial axis is always "radial axis"
