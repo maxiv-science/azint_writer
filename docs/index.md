@@ -37,51 +37,80 @@ Here is a sample Python snippet using **azint-writer**:
 import azint, azint_writer, h5py
 import numpy as np
 
-# Open the HDF5 file containing detector data
+# ------------------------------
+# Load detector image and setup
+# ------------------------------
+
+# Path to the input HDF5 file containing detector data
 h5name = "scan-1737_pilatus.h5"
 h = h5py.File(h5name, 'r')
-# Read the an image frame from the dataset
+
+# Extract a single image frame from the dataset
 img = h['/entry/instrument/pilatus/data'][10]
-# Specify the PONI file (detector geometry calibration)
+
+# Path to the detector calibration file
 poni = 'Si_135mm.poni'
-# Create a mask with the same shape as the image
+
+# Path to the mask file for bad pixels or beamstop
 mask = 'hot_px_bs_mask.npy'
 
+# ------------------------------
+# Azimuthal integration settings
+# ------------------------------
 
-# Configuration for the azimuthal integration
 config = {
-    'poni': poni,                      # Path to the PONI file
-    'mask': mask,                      # Mask to ignore bad pixels
-    'radial_bins': 3000,               # Number of radial bins for integration
-    'azimuth_bins': 180, # or None     # Number of azimuthal bins (for 2D integration)
-    'n_splitting': 21,                 # Number of subdivisions per pixel (for precision)
-    'error_model': 'poisson',          # Error propagation model
-    'solid_angle': True,               # Apply solid angle correction
-    'polarization_factor': 0.965,      # Correction for polarization effects
-    'normalized': True,                # Normalize the output intensities
-    'unit': '2th',                     # Output units (e.g., 2θ)
+    'poni': poni,                      # Detector geometry calibration file
+    'mask': mask,                      # Mask to ignore hot/dead pixels
+    'radial_bins': 3000,              # Number of radial bins
+    'azimuth_bins': 180,              # Number of azimuthal bins (set to None for 1D only)
+    'n_splitting': 21,                # Pixel subdivision for integration precision
+    'error_model': 'poisson',         # Error model for propagation
+    'solid_angle': True,              # Apply solid angle correction
+    'polarization_factor': 0.965,     # Correction for polarization effects
+    'normalized': True,               # Normalize intensity values
+    'unit': '2th',                    # Output units (e.g., '2th' for 2θ)
 }
-# Create the azimuthal integrator instance using azint
+
+# ------------------------------
+# Output file and metadata config
+# ------------------------------
+
+# Create the azimuthal integrator instance
 ai = azint.AzimuthalIntegrator(**config)
-# Perform the azimuthal integration on the image
+
+# Configuration for writing NeXus-compliant HDF5 output
+init_writer_config = {
+    'ai': ai,
+    'output_file': 'nx_azint1d_azint2d.h5',
+    'write_1d': True,
+    'write_2d': True,  # Set to False if azimuth_bins is None
+    'instrument_name': 'DanMAX',
+    'source_name': 'MAX IV',
+    'source_type': 'Synchrotron X-ray Source',
+    'source_probe': 'X-ray',
+}
+
+# Create writer instance
+nx = azint_writer.NXWriter(**init_writer_config)
+
+# ------------------------------
+# Perform integration and save
+# ------------------------------
+
+# Integrate the selected image
 data = ai.integrate(img)
 
+# Add the integrated data to the NeXus HDF5 file
+nx.add_data(data)
 
-# Configuration for the NXWriter (NeXus HDF5 file writer)
-init_writer_config = {
-    'ai': ai,                                   # AzimuthalIntegrator instance
-    'output_file': 'nx_azint1d_azint2d.h5',     # Output file name
-    'write_1d': True,                           # Whether to write 1D integration data
-    'write_2d': True,                           # Whether to write 2D (cake) integration data (False if azimuth_bins is None)
-    'instrument_name': 'DanMAX',                # Name of the beamline or instrument
-    'source_name': 'MAX IV',                    # Name of the facility or source
-    'source_type': 'Synchrotron X-ray Source',  # Type of source
-    'source_probe': 'X-ray',                    # Type of probe used (e.g., x-ray, neutron)
-}
-# Create the NXWriter instance and write the data to the file
-nx = azint_writer.NXWriter(**init_writer_config)
-# Add the integrated data to the file
-nx.add_data(data)  
+# ------------------------------
+# Optionally add monitor data
+# ------------------------------
+from azint_writer import add_monitor
+
+# A 1D array of monitor counts per image (must match number of images)
+monitor = [1, ..., nImg]  # Replace with actual monitor data
+add_monitor("nx_azint1d_azint2d.h5", monitor)
 ```
 
 ## Contributing
