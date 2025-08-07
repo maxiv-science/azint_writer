@@ -100,16 +100,17 @@ class NXWriter:
             logging.info(f"Creating {'NXazint1d' if self.write_1d else 'NXazint2d'}")
             definition = entry.create_dataset("definition", data='NXazint1d' if self.write_1d else 'NXazint2d')       
         
-        solid_angle = entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
+            solid_angle = entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
 
-        polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
-        polarization_applied = entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
+            polarization_applied = entry.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
 
-        normalization = entry.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
+            normalization = entry.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
+            monitor = entry.create_dataset("monitor_applied", data=False)
 
-        logging.info("solid_angle_applied and polarization_applied data sets are created")
-        logging.info(f"solid_angle: {self.ai.solid_angle}")
-        logging.info(f"polarization_factor: {self.ai.polarization_factor}")
+            logging.info("solid_angle_applied and polarization_applied data sets are created")
+            logging.info(f"solid_angle: {self.ai.solid_angle}")
+            logging.info(f"polarization_factor: {self.ai.polarization_factor}")
         
 
         # Add instrument
@@ -182,6 +183,15 @@ class NXWriter:
             azint1dSE.attrs["NX_class"] = "NXsubentry"
 
             definition = azint1dSE.create_dataset("definition", data="NXazint1d")
+                 
+        
+            solid_angle = azint1dSE.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
+
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
+            polarization_applied = azint1dSE.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
+
+            normalization = azint1dSE.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
+            monitor = azint1dSE.create_dataset("monitor_applied", data=False)
 
             azint1dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
@@ -231,6 +241,15 @@ class NXWriter:
             azint2dSE.attrs["NX_class"] = "NXsubentry"
 
             definition = azint2dSE.create_dataset("definition", data="NXazint2d")
+                 
+        
+            solid_angle = azint2dSE.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
+
+            polarization = self.ai.polarization_factor if self.ai.polarization_factor is not None else 0
+            polarization_applied = azint2dSE.create_dataset("polarization_applied", data=True if self.ai.polarization_factor  is not None else False)
+
+            normalization = azint2dSE.create_dataset("normalization_applied", data=True if self.ai.normalized else False)
+            monitor = azint2dSE.create_dataset("monitor_applied", data=False)
 
             azint2dSE["instrument"] = h5py.SoftLink('/entry/instrument')
 
@@ -413,37 +432,44 @@ class NXWriter:
 
         I, errors_1d, cake, errors_2d = integrated_data
         data = {}
-        if (self.write_1d and self.write_2d):
-        # if cake is not None: # will have eta bins
-            data["/entry/azint1d/data/I"] = I
-            data["/entry/azint2d/data/I"] = cake
-            if self.ai.normalized:
-                data["/entry/azint2d/data/norm"] = self.ai.norm_2d
-                data["/entry/azint1d/data/norm"] = self.ai.norm_1d
-            if errors_2d is not None:
-                data["/entry/azint2d/data/I_errors"] = errors_2d
-            if errors_1d is not None:
-                data["/entry/azint1d/data/I_errors"] = errors_1d
-        elif self.write_1d:  # must be radial bins only, no eta, ie 1d.
-            data["/entry/data/I"] = I
-            if self.ai.normalized:
-                data["/entry/data/norm"] = self.ai.norm_1d
-            if errors_1d is not None:
-                data["/entry/data/I_errors"] = errors_1d
-        elif self.write_2d:
-            data["/entry/data/I"] = cake
-            if self.ai.normalized:
-                data["/entry/data/norm"] = self.ai.norm_2d
-            if errors_2d is not None:
-                data["/entry/data/I_errors"] = errors_2d
-        else:
-            logging.error(f"At least one of 1D or 2D should be written")
-
         with h5py.File(self.output_file, "r+") as fh_u:
+            if (self.write_1d and self.write_2d):
+            # if cake is not None: # will have eta bins
+                data["/entry/azint1d/data/I"] = I
+                data["/entry/azint2d/data/I"] = cake
+                if self.ai.normalized:
+                    if "/entry/azint2d/data/norm" not in fh_u:
+                        data["/entry/azint2d/data/norm"] = self.ai.norm_2d
+                    if "/entry/azint1d/data/norm" not in fh_u:
+                        data["/entry/azint1d/data/norm"] = self.ai.norm_1d
+                if errors_2d is not None:
+                    data["/entry/azint2d/data/I_errors"] = errors_2d
+                if errors_1d is not None:
+                    data["/entry/azint1d/data/I_errors"] = errors_1d
+            elif self.write_1d:  # must be radial bins only, no eta, ie 1d.
+                data["/entry/data/I"] = I
+                if self.ai.normalized:
+                    if "/entry/data/norm" not in fh_u:
+                        data["/entry/data/norm"] = self.ai.norm_1d
+                if errors_1d is not None:
+                    data["/entry/data/I_errors"] = errors_1d
+            elif self.write_2d:
+                data["/entry/data/I"] = cake
+                if self.ai.normalized:
+                    if "/entry/data/norm" not in fh_u:
+                        data["/entry/data/norm"] = self.ai.norm_2d
+                if errors_2d is not None:
+                    data["/entry/data/I_errors"] = errors_2d
+            else:
+                logging.error(f"At least one of 1D or 2D should be written")
+
             for key, value in data.items():
                 new_dset = fh_u.get(key)
                 if not new_dset:
-                    new_dset = fh_u.create_dataset(key, dtype=value.dtype,
+                    if "norm" in key:
+                        new_dset = fh_u.create_dataset(key, data=value, track_order=True)
+                    else:
+                        new_dset = fh_u.create_dataset(key, dtype=value.dtype,
                                                    shape=(0, *value.shape),
                                                    maxshape=(None, *value.shape),
                                                    chunks=(1, *value.shape))
@@ -455,9 +481,10 @@ class NXWriter:
                     if "norm" in key:
                         new_dset.attrs.modify("long_name", "number of pixels contributing to the corresponding bin")
 
-                n = new_dset.shape[0]
-                new_dset.resize(n + 1, axis=0)
-                new_dset[n] = value
+                if "norm" not in key:
+                    n = new_dset.shape[0]
+                    new_dset.resize(n + 1, axis=0)
+                    new_dset[n] = value
 
     def write_radial_axis(self, group, unit, radial_axis, radial_bins):
         # real dataset for radial axis is always "radial axis"
@@ -477,3 +504,62 @@ class NXWriter:
         dsete = group.create_dataset("radial_axis_edges", data=edges, track_order=True)
         dsete.attrs["long_name"] = "q bin edges" if unit == "q" else "2theta bin edges"
         dsete.attrs["units"] = "1/angstrom" if unit == "q" else "degrees"
+
+def add_monitor(h5file, monitor_data):
+    """
+    Add or update a 'monitor' group with a 'data' dataset in a NeXus HDF5 file.
+
+    This function checks for the existence of specific groups in the NeXus file
+    and inserts monitor data into `/entry/monitor` if `/entry/definition` exists,
+    or into `/entry/azint1d/monitor` and `/entry/azint2d/monitor` otherwise.
+
+    If the 'monitor' group or 'data' dataset already exists, they are reused or
+    updated. If the shape of the existing dataset differs from the new data, it
+    is deleted and recreated.
+
+    Parameters
+    ----------
+    h5file : str
+        Path to the HDF5 (.nxs) file to be modified.
+    monitor_data : array-like
+        NumPy array or array-like object containing monitor signal data to write.
+    """
+
+    if not isinstance(monitor_data, np.ndarray):
+        try:
+            monitor_data = np.asarray(monitor_data)
+        except Exception as e:
+            raise TypeError(f"Could not convert monitor_data to a NumPy array: {e}")
+
+    with h5py.File(h5file, "r+") as fh_u:
+        if "/entry/definition" in fh_u:
+            entry_paths = ["entry"]
+        else:
+            entry_paths = ["entry/azint1d", "entry/azint2d"]
+        n_image = fh_u[f"entry/data/I"].shape[0]
+        if monitor_data.shape[0] != n_image:
+            raise ValueError(
+                f"Monitor data length ({monitor_data.shape[0]}) does not match "
+                f"number of images ({n_image})."
+            )
+        for entry_path in entry_paths:
+            try:
+                # Get or create the monitor group
+                monitor = fh_u.require_group(f"{entry_path}/monitor")
+                monitor.attrs["NX_class"] = np.string_("NXmonitor")
+
+                # Check if 'data' exists and update if possible
+                if "data" in monitor:
+                    dset = monitor["data"]
+                    if dset.dtype != monitor_data.dtype or dset.shape != monitor_data.shape:
+                        del monitor["data"]
+                        monitor.create_dataset("data", data=monitor_data, track_order=True)
+                    else:
+                        dset[...] = monitor_data
+                else:
+                    monitor.create_dataset("data", data=monitor_data, track_order=True)
+                fh_u[entry_path]["monitor_applied"][...] = True
+
+                logging.info(f"Monitor data added to {entry_path}/monitor")
+            except Exception as e:
+                logging.error(f"Error handling monitor data at {entry_path}: {e}")
