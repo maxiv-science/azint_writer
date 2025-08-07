@@ -515,14 +515,18 @@
 (<a href="https://zenodo.org/records/15744977?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjQxMTA4MjgzLWQ5ODUtNGE3MS04MGU4LTI4MzgwYzAwNDNlYiIsImRhdGEiOnt9LCJyYW5kb20iOiIzOTI4ZmM1YzRhODgwODI3ZDU0ZGVjYTYxNmViNTg0NyJ9.lt_pXKDYR6t29tGKqcm6huHzvgeqlwc5U5I9TXJ5-LQlL865aGLQE7B6-h6ZS7PLQ7yEGf6M3jV1HacXVpSPiA">link</a> to file examples and output)</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">azint</span><span class="o">,</span><span class="w"> </span><span class="nn">azint_writer</span><span class="o">,</span><span class="w"> </span><span class="nn">h5py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">azint_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_monitor</span>
 
 <span class="c1"># Open the HDF5 file containing detector data</span>
 <span class="n">h5name</span> <span class="o">=</span> <span class="s2">&quot;scan-1737_pilatus.h5&quot;</span>
 <span class="n">h</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">h5name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-<span class="c1"># Read an image frame from the dataset</span>
+
+<span class="c1"># Read the an image frame from the dataset</span>
 <span class="n">img</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="s1">&#39;/entry/instrument/pilatus/data&#39;</span><span class="p">][</span><span class="mi">10</span><span class="p">]</span>
+
 <span class="c1"># Specify the PONI file (detector geometry calibration)</span>
 <span class="n">poni</span> <span class="o">=</span> <span class="s1">&#39;Si_135mm.poni&#39;</span>
+
 <span class="c1"># Create a mask with the same shape as the image</span>
 <span class="n">mask</span> <span class="o">=</span> <span class="s1">&#39;hot_px_bs_mask.npy&#39;</span>
 
@@ -538,13 +542,8 @@
     <span class="s1">&#39;solid_angle&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>               <span class="c1"># Apply solid angle correction</span>
     <span class="s1">&#39;polarization_factor&#39;</span><span class="p">:</span> <span class="mf">0.965</span><span class="p">,</span>      <span class="c1"># Correction for polarization effects</span>
     <span class="s1">&#39;normalized&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                <span class="c1"># Normalize the output intensities</span>
-    <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;2th&#39;</span><span class="p">,</span>   <span class="c1"># or q            # Output units (e.g., 2θ, q)</span>
+    <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;2th&#39;</span><span class="p">,</span>                     <span class="c1"># Output units (e.g., 2θ)</span>
 <span class="p">}</span>
-<span class="c1"># Create the azimuthal integrator instance using azint</span>
-<span class="n">ai</span> <span class="o">=</span> <span class="n">azint</span><span class="o">.</span><span class="n">AzimuthalIntegrator</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
-<span class="c1"># Perform the azimuthal integration on the image</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
-
 
 <span class="c1"># Configuration for the NXWriter (NeXus HDF5 file writer)</span>
 <span class="n">init_writer_config</span> <span class="o">=</span> <span class="p">{</span>
@@ -557,10 +556,19 @@
     <span class="s1">&#39;source_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Synchrotron X-ray Source&#39;</span><span class="p">,</span>  <span class="c1"># Type of source</span>
     <span class="s1">&#39;source_probe&#39;</span><span class="p">:</span> <span class="s1">&#39;X-ray&#39;</span><span class="p">,</span>                    <span class="c1"># Type of probe used (e.g., x-ray, neutron)</span>
 <span class="p">}</span>
-<span class="c1"># Create the NXWriter instance and write the data to the file</span>
+
+
+<span class="c1"># Create the azimuthal integrator and NXWriter instance using azint and azint_writer</span>
+<span class="n">ai</span> <span class="o">=</span> <span class="n">azint</span><span class="o">.</span><span class="n">AzimuthalIntegrator</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
 <span class="n">nx</span> <span class="o">=</span> <span class="n">azint_writer</span><span class="o">.</span><span class="n">NXWriter</span><span class="p">(</span><span class="o">**</span><span class="n">init_writer_config</span><span class="p">)</span>
-<span class="c1"># Add the integrated data to the file</span>
-<span class="n">nx</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  
+
+<span class="c1"># Perform the azimuthal integration on the image and Add the integrated data to the file</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="n">nx</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Monitor data can be added at the end:</span>
+<span class="n">monitor</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">nImg</span><span class="p">]</span> <span class="c1"># a one dinemtionall array with the same size of number of images</span>
+<span class="n">add_monitor</span><span class="p">(</span><span class="s2">&quot;nx_azint1d_azint2d.h5&quot;</span><span class="p">,</span> <span class="n">monitor</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="contributing">Contributing</h2>
 <p>We welcome and encourage contributions to <strong>azint-writer</strong>! Here's how you can get involved:</p>
