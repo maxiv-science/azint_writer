@@ -1,5 +1,7 @@
 # azint-writer
 
+[![DOI](https://zenodo.org/badge/898945642.svg)](https://doi.org/10.5281/zenodo.16760895)
+
 **azint-writer** is a Python package for writing HDF5 files using a new [NeXus](https://www.nexusformat.org/) extension tailored for azimuthal integration in diffraction experiments. It supports 1D/2D integration data, calibration info, and experiment metadata in a flexible, NeXus-compliant format.
 
 - 📦 Install via: `conda install -c maxiv azint-writer`  
