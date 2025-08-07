@@ -525,12 +525,23 @@ def add_monitor(h5file, monitor_data):
         NumPy array or array-like object containing monitor signal data to write.
     """
 
+    if not isinstance(monitor_data, np.ndarray):
+        try:
+            monitor_data = np.asarray(monitor_data)
+        except Exception as e:
+            raise TypeError(f"Could not convert monitor_data to a NumPy array: {e}")
+
     with h5py.File(h5file, "r+") as fh_u:
         if "/entry/definition" in fh_u:
             entry_paths = ["entry"]
         else:
             entry_paths = ["entry/azint1d", "entry/azint2d"]
-
+        n_image = fh_u[f"entry/data/I"].shape[0]
+        if monitor_data.shape[0] != n_image:
+            raise ValueError(
+                f"Monitor data length ({monitor_data.shape[0]}) does not match "
+                f"number of images ({n_image})."
+            )
         for entry_path in entry_paths:
             try:
                 # Get or create the monitor group
@@ -540,11 +551,11 @@ def add_monitor(h5file, monitor_data):
                 # Check if 'data' exists and update if possible
                 if "data" in monitor:
                     dset = monitor["data"]
-                    if dset.shape == monitor_data.shape:
-                        dset[...] = monitor_data  # overwrite in place
-                    else:
+                    if dset.dtype != monitor_data.dtype or dset.shape != monitor_data.shape:
                         del monitor["data"]
                         monitor.create_dataset("data", data=monitor_data, track_order=True)
+                    else:
+                        dset[...] = monitor_data
                 else:
                     monitor.create_dataset("data", data=monitor_data, track_order=True)
                 fh_u[entry_path]["monitor_applied"][...] = True
