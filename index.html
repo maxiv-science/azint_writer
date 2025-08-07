@@ -517,57 +517,78 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">azint_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_monitor</span>
 
-<span class="c1"># Open the HDF5 file containing detector data</span>
+<span class="c1"># ------------------------------</span>
+<span class="c1"># Load detector image and setup</span>
+<span class="c1"># ------------------------------</span>
+
+<span class="c1"># Path to the input HDF5 file containing detector data</span>
 <span class="n">h5name</span> <span class="o">=</span> <span class="s2">&quot;scan-1737_pilatus.h5&quot;</span>
 <span class="n">h</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">h5name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
 
-<span class="c1"># Read the an image frame from the dataset</span>
+<span class="c1"># Extract a single image frame from the dataset</span>
 <span class="n">img</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="s1">&#39;/entry/instrument/pilatus/data&#39;</span><span class="p">][</span><span class="mi">10</span><span class="p">]</span>
 
-<span class="c1"># Specify the PONI file (detector geometry calibration)</span>
+<span class="c1"># Path to the detector calibration file</span>
 <span class="n">poni</span> <span class="o">=</span> <span class="s1">&#39;Si_135mm.poni&#39;</span>
 
-<span class="c1"># Create a mask with the same shape as the image</span>
+<span class="c1"># Path to the mask file for bad pixels or beamstop</span>
 <span class="n">mask</span> <span class="o">=</span> <span class="s1">&#39;hot_px_bs_mask.npy&#39;</span>
 
+<span class="c1"># ------------------------------</span>
+<span class="c1"># Azimuthal integration settings</span>
+<span class="c1"># ------------------------------</span>
 
-<span class="c1"># Configuration for the azimuthal integration</span>
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;poni&#39;</span><span class="p">:</span> <span class="n">poni</span><span class="p">,</span>                      <span class="c1"># Path to the PONI file</span>
-    <span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span>                      <span class="c1"># Mask to ignore bad pixels</span>
-    <span class="s1">&#39;radial_bins&#39;</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>               <span class="c1"># Number of radial bins for integration</span>
-    <span class="s1">&#39;azimuth_bins&#39;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span> <span class="c1"># or None     # Number of azimuthal bins (for 2D integration)</span>
-    <span class="s1">&#39;n_splitting&#39;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span>                 <span class="c1"># Number of subdivisions per pixel (for precision)</span>
-    <span class="s1">&#39;error_model&#39;</span><span class="p">:</span> <span class="s1">&#39;poisson&#39;</span><span class="p">,</span>          <span class="c1"># Error propagation model</span>
-    <span class="s1">&#39;solid_angle&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>               <span class="c1"># Apply solid angle correction</span>
-    <span class="s1">&#39;polarization_factor&#39;</span><span class="p">:</span> <span class="mf">0.965</span><span class="p">,</span>      <span class="c1"># Correction for polarization effects</span>
-    <span class="s1">&#39;normalized&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                <span class="c1"># Normalize the output intensities</span>
-    <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;2th&#39;</span><span class="p">,</span>                     <span class="c1"># Output units (e.g., 2θ)</span>
+    <span class="s1">&#39;poni&#39;</span><span class="p">:</span> <span class="n">poni</span><span class="p">,</span>                      <span class="c1"># Detector geometry calibration file</span>
+    <span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span>                      <span class="c1"># Mask to ignore hot/dead pixels</span>
+    <span class="s1">&#39;radial_bins&#39;</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>              <span class="c1"># Number of radial bins</span>
+    <span class="s1">&#39;azimuth_bins&#39;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span>              <span class="c1"># Number of azimuthal bins (set to None for 1D only)</span>
+    <span class="s1">&#39;n_splitting&#39;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span>                <span class="c1"># Pixel subdivision for integration precision</span>
+    <span class="s1">&#39;error_model&#39;</span><span class="p">:</span> <span class="s1">&#39;poisson&#39;</span><span class="p">,</span>         <span class="c1"># Error model for propagation</span>
+    <span class="s1">&#39;solid_angle&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>              <span class="c1"># Apply solid angle correction</span>
+    <span class="s1">&#39;polarization_factor&#39;</span><span class="p">:</span> <span class="mf">0.965</span><span class="p">,</span>     <span class="c1"># Correction for polarization effects</span>
+    <span class="s1">&#39;normalized&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>               <span class="c1"># Normalize intensity values</span>
+    <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;2th&#39;</span><span class="p">,</span>                    <span class="c1"># Output units (e.g., &#39;2th&#39; for 2θ)</span>
 <span class="p">}</span>
 
-<span class="c1"># Configuration for the NXWriter (NeXus HDF5 file writer)</span>
-<span class="n">init_writer_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;ai&#39;</span><span class="p">:</span> <span class="n">ai</span><span class="p">,</span>                                   <span class="c1"># AzimuthalIntegrator instance</span>
-    <span class="s1">&#39;output_file&#39;</span><span class="p">:</span> <span class="s1">&#39;nx_azint1d_azint2d.h5&#39;</span><span class="p">,</span>     <span class="c1"># Output file name</span>
-    <span class="s1">&#39;write_1d&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># Whether to write 1D integration data</span>
-    <span class="s1">&#39;write_2d&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># Whether to write 2D (cake) integration data (False if azimuth_bins is None)</span>
-    <span class="s1">&#39;instrument_name&#39;</span><span class="p">:</span> <span class="s1">&#39;DanMAX&#39;</span><span class="p">,</span>                <span class="c1"># Name of the beamline or instrument</span>
-    <span class="s1">&#39;source_name&#39;</span><span class="p">:</span> <span class="s1">&#39;MAX IV&#39;</span><span class="p">,</span>                    <span class="c1"># Name of the facility or source</span>
-    <span class="s1">&#39;source_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Synchrotron X-ray Source&#39;</span><span class="p">,</span>  <span class="c1"># Type of source</span>
-    <span class="s1">&#39;source_probe&#39;</span><span class="p">:</span> <span class="s1">&#39;X-ray&#39;</span><span class="p">,</span>                    <span class="c1"># Type of probe used (e.g., x-ray, neutron)</span>
-<span class="p">}</span>
+<span class="c1"># ------------------------------</span>
+<span class="c1"># Output file and metadata config</span>
+<span class="c1"># ------------------------------</span>
 
-
-<span class="c1"># Create the azimuthal integrator and NXWriter instance using azint and azint_writer</span>
+<span class="c1"># Create the azimuthal integrator instance</span>
 <span class="n">ai</span> <span class="o">=</span> <span class="n">azint</span><span class="o">.</span><span class="n">AzimuthalIntegrator</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Configuration for writing NeXus-compliant HDF5 output</span>
+<span class="n">init_writer_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;ai&#39;</span><span class="p">:</span> <span class="n">ai</span><span class="p">,</span>
+    <span class="s1">&#39;output_file&#39;</span><span class="p">:</span> <span class="s1">&#39;nx_azint1d_azint2d.h5&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;write_1d&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;write_2d&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Set to False if azimuth_bins is None</span>
+    <span class="s1">&#39;instrument_name&#39;</span><span class="p">:</span> <span class="s1">&#39;DanMAX&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;source_name&#39;</span><span class="p">:</span> <span class="s1">&#39;MAX IV&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;source_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Synchrotron X-ray Source&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;source_probe&#39;</span><span class="p">:</span> <span class="s1">&#39;X-ray&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># Create writer instance</span>
 <span class="n">nx</span> <span class="o">=</span> <span class="n">azint_writer</span><span class="o">.</span><span class="n">NXWriter</span><span class="p">(</span><span class="o">**</span><span class="n">init_writer_config</span><span class="p">)</span>
 
-<span class="c1"># Perform the azimuthal integration on the image and Add the integrated data to the file</span>
+<span class="c1"># ------------------------------</span>
+<span class="c1"># Perform integration and save</span>
+<span class="c1"># ------------------------------</span>
+
+<span class="c1"># Integrate the selected image</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+<span class="c1"># Add the integrated data to the NeXus HDF5 file</span>
 <span class="n">nx</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-<span class="c1"># Monitor data can be added at the end:</span>
-<span class="n">monitor</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">nImg</span><span class="p">]</span> <span class="c1"># a one dinemtionall array with the same size of number of images</span>
+<span class="c1"># ------------------------------</span>
+<span class="c1"># Optionally add monitor data</span>
+<span class="c1"># ------------------------------</span>
+
+<span class="c1"># A 1D array of monitor counts per image (must match number of images)</span>
+<span class="n">monitor</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">nImg</span><span class="p">]</span>  <span class="c1"># Replace with actual monitor data</span>
 <span class="n">add_monitor</span><span class="p">(</span><span class="s2">&quot;nx_azint1d_azint2d.h5&quot;</span><span class="p">,</span> <span class="n">monitor</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="contributing">Contributing</h2>
