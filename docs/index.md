@@ -98,7 +98,7 @@ nx = azint_writer.NXWriter(**init_writer_config)
 # ------------------------------
 
 # Integrate the selected image
-data = ai.integrate(img)
+data = ai.integrate(img) # data = (I, errors_1d, I_2d, errors_2d)
 
 # Add the integrated data to the NeXus HDF5 file
 nx.add_data(data)
