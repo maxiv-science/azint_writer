@@ -512,7 +512,7 @@
 <p>For more information about the NeXus standard, see the <a href="https://www.nexusformat.org/">official documentation</a>.</p>
 <h2 id="example-usage">Example Usage</h2>
 <p>Here is a sample Python snippet using <strong>azint-writer</strong>:
-(<a href="https://zenodo.org/records/15744977?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjQxMTA4MjgzLWQ5ODUtNGE3MS04MGU4LTI4MzgwYzAwNDNlYiIsImRhdGEiOnt9LCJyYW5kb20iOiIzOTI4ZmM1YzRhODgwODI3ZDU0ZGVjYTYxNmViNTg0NyJ9.lt_pXKDYR6t29tGKqcm6huHzvgeqlwc5U5I9TXJ5-LQlL865aGLQE7B6-h6ZS7PLQ7yEGf6M3jV1HacXVpSPiA">link</a> to file examples and output)</p>
+(<a href="https://zenodo.org/records/17286999">link</a> to file examples and output)</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">azint</span><span class="o">,</span><span class="w"> </span><span class="nn">azint_writer</span><span class="o">,</span><span class="w"> </span><span class="nn">h5py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -538,8 +538,8 @@
 <span class="c1"># ------------------------------</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;poni&#39;</span><span class="p">:</span> <span class="n">poni</span><span class="p">,</span>                      <span class="c1"># Detector geometry calibration file</span>
-    <span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span>                      <span class="c1"># Mask to ignore hot/dead pixels</span>
+    <span class="s1">&#39;poni&#39;</span><span class="p">:</span> <span class="n">poni</span><span class="p">,</span>                     <span class="c1"># Detector geometry calibration file</span>
+    <span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span>                     <span class="c1"># Mask to ignore hot/dead pixels</span>
     <span class="s1">&#39;radial_bins&#39;</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>              <span class="c1"># Number of radial bins</span>
     <span class="s1">&#39;azimuth_bins&#39;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span>              <span class="c1"># Number of azimuthal bins (set to None for 1D only)</span>
     <span class="s1">&#39;n_splitting&#39;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span>                <span class="c1"># Pixel subdivision for integration precision</span>
@@ -566,7 +566,7 @@
     <span class="s1">&#39;instrument_name&#39;</span><span class="p">:</span> <span class="s1">&#39;DanMAX&#39;</span><span class="p">,</span>
     <span class="s1">&#39;source_name&#39;</span><span class="p">:</span> <span class="s1">&#39;MAX IV&#39;</span><span class="p">,</span>
     <span class="s1">&#39;source_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Synchrotron X-ray Source&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;source_probe&#39;</span><span class="p">:</span> <span class="s1">&#39;X-ray&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;source_probe&#39;</span><span class="p">:</span> <span class="s1">&#39;x-ray&#39;</span><span class="p">,</span> <span class="c1"># (&#39;neutron&#39;, &#39;x-ray&#39;, &#39;electron&#39;, &#39;muon&#39;)</span>
 <span class="p">}</span>
 
 <span class="c1"># Create writer instance</span>
