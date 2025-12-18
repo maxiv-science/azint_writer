@@ -488,7 +488,7 @@
 
 
 <h1 id="nexus-azint-writer">NeXus azint writer</h1>
-<p><a href="https://github.com/maxiv-science/azint_writer"><code>azint-writer</code></a> is a Python package for writing HDF5 files in the <a href="https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint1d.html">NXazint1d</a> or <a href="https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint2d.html">NXazint2d</a> format, a new extension to the <a href="https://www.nexusformat.org/">NeXus</a> standard. The NXazint1d (NXazint2d) format is specifically designed for storing data related to azimuthal integration in diffraction experiments.</p>
+<p><a href="https://github.com/maxiv-science/azint_writer"><code>azint-writer</code></a> is a Python package for writing HDF5 files in the <a href="https://manual.nexusformat.org/classes/applications/NXazint1d.html">NXazint1d</a> or <a href="https://manual.nexusformat.org/classes/applications/NXazint2d.html">NXazint2d</a> format, a new extension to the <a href="https://www.nexusformat.org/">NeXus</a> standard. The NXazint1d (NXazint2d) format is specifically designed for storing data related to azimuthal integration in diffraction experiments.</p>
 <blockquote>
 <p><strong>Note:</strong> The <strong>azint-writer</strong> package is currently coupled to the <a href="https://github.com/maxiv-science/azint"><code>azint</code></a> library for performing azimuthal integration.</p>
 </blockquote>
@@ -512,7 +512,7 @@
 <p>For more information about the NeXus standard, see the <a href="https://www.nexusformat.org/">official documentation</a>.</p>
 <h2 id="example-usage">Example Usage</h2>
 <p>Here is a sample Python snippet using <strong>azint-writer</strong>:
-(<a href="https://zenodo.org/records/17286999">link</a> to file examples and output)</p>
+(<a href="https://zenodo.org/records/17975608">link</a> to file examples and output)</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">azint</span><span class="o">,</span><span class="w"> </span><span class="nn">azint_writer</span><span class="o">,</span><span class="w"> </span><span class="nn">h5py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -538,8 +538,8 @@
 <span class="c1"># ------------------------------</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;poni&#39;</span><span class="p">:</span> <span class="n">poni</span><span class="p">,</span>                     <span class="c1"># Detector geometry calibration file</span>
-    <span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span>                     <span class="c1"># Mask to ignore hot/dead pixels</span>
+    <span class="s1">&#39;poni&#39;</span><span class="p">:</span> <span class="n">poni</span><span class="p">,</span>                      <span class="c1"># Detector geometry calibration file</span>
+    <span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span>                      <span class="c1"># Mask to ignore hot/dead pixels</span>
     <span class="s1">&#39;radial_bins&#39;</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>              <span class="c1"># Number of radial bins</span>
     <span class="s1">&#39;azimuth_bins&#39;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span>              <span class="c1"># Number of azimuthal bins (set to None for 1D only)</span>
     <span class="s1">&#39;n_splitting&#39;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span>                <span class="c1"># Pixel subdivision for integration precision</span>
@@ -566,7 +566,7 @@
     <span class="s1">&#39;instrument_name&#39;</span><span class="p">:</span> <span class="s1">&#39;DanMAX&#39;</span><span class="p">,</span>
     <span class="s1">&#39;source_name&#39;</span><span class="p">:</span> <span class="s1">&#39;MAX IV&#39;</span><span class="p">,</span>
     <span class="s1">&#39;source_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Synchrotron X-ray Source&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;source_probe&#39;</span><span class="p">:</span> <span class="s1">&#39;x-ray&#39;</span><span class="p">,</span> <span class="c1"># (&#39;neutron&#39;, &#39;x-ray&#39;, &#39;electron&#39;, &#39;muon&#39;)</span>
+    <span class="s1">&#39;source_probe&#39;</span><span class="p">:</span> <span class="s1">&#39;X-ray&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># Create writer instance</span>
