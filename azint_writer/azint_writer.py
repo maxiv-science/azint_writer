@@ -206,7 +206,7 @@ class NXWriter:
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
-            reduction.create_dataset("date", data=np.string_(datetime.now().isoformat()))
+            date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
 
@@ -264,7 +264,7 @@ class NXWriter:
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
-            reduction.create_dataset("date", data=np.string_(datetime.now().isoformat()))
+            date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
 
@@ -321,7 +321,7 @@ class NXWriter:
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
-            reduction.create_dataset("date", data=np.string_(datetime.now().isoformat()))
+            date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
 
@@ -369,7 +369,7 @@ class NXWriter:
             reduction.attrs["NX_class"] = "NXprocess"
             prog = reduction.create_dataset("program", data="azint-pipeline")
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
-            reduction.create_dataset("date", data=np.string_(datetime.now().isoformat()))
+            date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
             ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
 
