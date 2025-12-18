@@ -11,7 +11,6 @@ setup(
     packages=find_packages(),
     install_requires=[
         "h5py",
-        "azint",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

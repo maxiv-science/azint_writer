@@ -98,6 +98,13 @@ class NXWriter:
 
         if not (self.write_1d and self.write_2d):
             logging.info(f"Creating {'NXazint1d' if self.write_1d else 'NXazint2d'}")
+            try:
+                self.fh.attrs.setdefault("file_name", np.string_(os.path.basename(self.output_file)))
+                self.fh.attrs.setdefault("file_time", np.string_(datetime.now().isoformat()))
+                self.fh.attrs.setdefault("HDF5_Version", np.string_(h5py.version.hdf5_version))
+            except Exception as e:
+                logging.debug(f"Could not set global attributes: {e}")
+            
             definition = entry.create_dataset("definition", data='NXazint1d' if self.write_1d else 'NXazint2d')       
         
             solid_angle = entry.create_dataset("solid_angle_applied", data=True if self.ai.solid_angle else False)
@@ -197,10 +204,10 @@ class NXWriter:
 
             reduction = azint1dSE.create_group("reduction", track_order=True)
             reduction.attrs["NX_class"] = "NXprocess"
-            prog = reduction.create_dataset("program", data="azint")
+            prog = reduction.create_dataset("program", data="azint-pipeline")
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
-            ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
+            ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\n\nhttps://maxiv-science.github.io/azint/,\nhttps://maxiv-science.github.io/azint_writer/")
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
 
             input = reduction.create_group("input", track_order=True)
@@ -258,7 +265,7 @@ class NXWriter:
             prog = reduction.create_dataset("program", data="azint-pipeline")
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
-            ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
+            ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\n\nhttps://maxiv-science.github.io/azint/,\nhttps://maxiv-science.github.io/azint_writer/")
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
 
             input = reduction.create_group("input", track_order=True)
@@ -315,7 +322,7 @@ class NXWriter:
             prog = reduction.create_dataset("program", data="azint-pipeline")
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
-            ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
+            ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\n\nhttps://maxiv-science.github.io/azint/,\nhttps://maxiv-science.github.io/azint_writer/")
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
 
             input = reduction.create_group("input", track_order=True)
@@ -363,7 +370,7 @@ class NXWriter:
             prog = reduction.create_dataset("program", data="azint-pipeline")
             ver = reduction.create_dataset("version", data=f"azint {azint.__version__}\nazint-writer {__version__}")
             date = reduction.create_dataset("date", data=datetime.now().strftime("%A, %B %d, %Y at %I:%M %p"))
-            ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\nhttps://maxiv-science.github.io/azint/")
+            ref = reduction.create_dataset("reference", data="Jensen, A. B., et al., (2022). J. Synchrotron Rad. 29, 1420-1428.\nhttps://doi.org/10.1107/S1600577522008232,\n\nhttps://maxiv-science.github.io/azint/,\nhttps://maxiv-science.github.io/azint_writer/")
             note = reduction.create_dataset("note", data="Geometry convention:\nAzimuthal origin in the horizontal plane to the right of the beam position, i.e., at 3 o’clock,\non the detector face. Positive azimuthal direction: clockwise.")
 
             input = reduction.create_group("input", track_order=True)
@@ -479,7 +486,7 @@ class NXWriter:
                     if "I_error" in key:
                         new_dset.attrs.modify("long_name", "estimated errors on intensity")
                     if "norm" in key:
-                        new_dset.attrs.modify("long_name", "number of pixels contributing to the corresponding bin")
+                        new_dset.attrs.modify("long_name", "effective number of pixels contributing to the corresponding bin")
 
                 if "norm" not in key:
                     n = new_dset.shape[0]

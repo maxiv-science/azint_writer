@@ -1,8 +1,3 @@
-azint:
-  - 1.1.0
-  - 1.1.0
-  - 1.1.0
-  
 python:
   - 3.10.*
   - 3.11.* 
@@ -10,4 +5,3 @@ python:
   
 zip_keys:
   - python
-  - azint
