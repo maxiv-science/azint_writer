@@ -1,6 +1,6 @@
 # NeXus azint writer
 
-[`azint-writer`](https://github.com/maxiv-science/azint_writer) is a Python package for writing HDF5 files in the [NXazint1d](https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint1d.html) or [NXazint2d](https://nxazint-hdf5-nexus-3229ecbd09ba8a773fbbd8beb72cace6216dfd5063e1.gitlab-pages.esrf.fr/classes/contributed_definitions/NXazint2d.html) format, a new extension to the [NeXus](https://www.nexusformat.org/) standard. The NXazint1d (NXazint2d) format is specifically designed for storing data related to azimuthal integration in diffraction experiments.
+[`azint-writer`](https://github.com/maxiv-science/azint_writer) is a Python package for writing HDF5 files in the [NXazint1d](https://manual.nexusformat.org/classes/applications/NXazint1d.html) or [NXazint2d](https://manual.nexusformat.org/classes/applications/NXazint2d.html) format, a new extension to the [NeXus](https://www.nexusformat.org/) standard. The NXazint1d (NXazint2d) format is specifically designed for storing data related to azimuthal integration in diffraction experiments.
 
 > **Note:** The **azint-writer** package is currently coupled to the [`azint`](https://github.com/maxiv-science/azint) library for performing azimuthal integration.
 
@@ -31,7 +31,7 @@ For more information about the NeXus standard, see the [official documentation](
 ## Example Usage
 
 Here is a sample Python snippet using **azint-writer**:
-([link](https://zenodo.org/records/15744977?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjQxMTA4MjgzLWQ5ODUtNGE3MS04MGU4LTI4MzgwYzAwNDNlYiIsImRhdGEiOnt9LCJyYW5kb20iOiIzOTI4ZmM1YzRhODgwODI3ZDU0ZGVjYTYxNmViNTg0NyJ9.lt_pXKDYR6t29tGKqcm6huHzvgeqlwc5U5I9TXJ5-LQlL865aGLQE7B6-h6ZS7PLQ7yEGf6M3jV1HacXVpSPiA) to file examples and output)
+([link](https://zenodo.org/records/17975608) to file examples and output)
 
 ```python
 import azint, azint_writer, h5py
