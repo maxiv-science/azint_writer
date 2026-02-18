@@ -31,7 +31,7 @@ For more information about the NeXus standard, see the [official documentation](
 ## Example Usage
 
 Here is a sample Python snippet using **azint-writer**:
-([link](https://zenodo.org/records/17975608) to file examples and output)
+([link](https://zenodo.org/records/15744976) to file examples and output)
 
 ```python
 import azint, azint_writer, h5py
