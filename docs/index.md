@@ -1,6 +1,6 @@
 # NeXus azint writer
 
-[`azint-writer`](https://github.com/maxiv-science/azint_writer) is a Python package for writing HDF5 files in the [NXazint1d](https://manual.nexusformat.org/classes/applications/NXazint1d.html) or [NXazint2d](https://manual.nexusformat.org/classes/applications/NXazint2d.html) format, a new extension to the [NeXus](https://www.nexusformat.org/) standard. The NXazint1d (NXazint2d) format is specifically designed for storing data related to azimuthal integration in diffraction experiments.
+[`azint-writer`](https://github.com/maxiv-science/azint_writer) is a Python package for writing HDF5 files in the [NXazint1d](https://manual.nexusformat.org/classes/applications/NXazint1d.html) or [NXazint2d](https://manual.nexusformat.org/classes/applications/NXazint2d.html) formats. These formats are specifically designed for storing data related to azimuthal integration in diffraction experiments.
 
 > **Note:** The **azint-writer** package is currently coupled to the [`azint`](https://github.com/maxiv-science/azint) library for performing azimuthal integration.
 
@@ -28,10 +28,20 @@ conda install -c maxiv azint-writer
 
 For more information about the NeXus standard, see the [official documentation](https://www.nexusformat.org/).
 
+## Example files
+
+- ([LaB6.h5](https://zenodo.org/records/18685806): Minimal NXazint1d file example. PXRD data from a LaB6 sample. 10 frames, 3000 radial bins.
+- ([BTO.h5](https://zenodo.org/records/18685854): NXazint1d file example, including I0 monitor, sample temperature (not calibrated), and time. Variable temperature PXRD data from a BaTiO3 sample. 500 frames, 3000 radial bins.
+- ([Magnet.h5](https://zenodo.org/records/18685870): NXazint2d file example, including I0 monitor, and sample rotation. PXRD data from a ferrite fridge magnet. Omega scan -45 -> 45 deg, 1 deg omega step, (right-handed rotation). 2000 radial bins, 180 azimuthal bins.
+- ([Magnet_multi.h5](https://zenodo.org/records/18685880): Combined NXazint1d and NXazint2d file example, including I0 monitor and sample rotation. PXRD data from a ferrite fridge magnet. Omega scan -45 -> 45 deg, 1 deg omega step, (right-handed rotation). 2000 radial bins, 180 azimuthal bins.
+- ([Magnet_low_res.h5](https://zenodo.org/records/18685893): Small NXazint2d file example, including I0 monitor, and sample rotation. PXRD data from a ferrite fridge magnet. Omega scan 0 - 45 deg, 2 deg omega step, (right-handed rotation), 2000 radial bins, 36 azimuthal bins.
+- ([Pinapple.h5](https://zenodo.org/records/18685899): NXazint1d mapping file example, including I0 monitor, and sample position. PXRD data from a scale of a pineapple mapped with a focused beam. 36055 diffractograms, each with 2000 radial bins.
+
+
 ## Example Usage
 
 Here is a sample Python snippet using **azint-writer**:
-([link](https://zenodo.org/records/15744976) to file examples and output)
+([link](https://zenodo.org/records/15744976) to file examples and output for this case)
 
 ```python
 import azint, azint_writer, h5py
