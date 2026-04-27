@@ -9,3 +9,11 @@
 - 💡 Contribute via pull requests (MIT licensed).
 
 📚 Full docs: [maxiv-science.github.io/azint_writer](https://maxiv-science.github.io/azint_writer)
+
+## Updating the documentation website
+
+The website at [maxiv-science.github.io/azint_writer](https://maxiv-science.github.io/azint_writer) is built with [MkDocs](https://www.mkdocs.org/) from the `docs/` folder on `main`.
+
+**To update the site:** create a branch of `main` and edit `docs/index.md` (or other files in `docs/`), merge a PR and the site will update automatically.
+
+> **Important:** Do not edit files directly on the `gh-pages` branch it contains auto-generated HTML and any manual changes will be overwritten.
