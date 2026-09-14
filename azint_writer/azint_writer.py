@@ -74,10 +74,19 @@ class NXWriter:
         self.source_type = source_type
         self.source_probe = source_probe
 
-        with h5py.File(self.output_file, "w") as fh_w:
-            self.fh = fh_w
-            if "entry" not in fh_w: # this condition can be omitted, check that
+        # Keep the HDF5 file open for the lifetime of the writer.
+        self.fh = h5py.File(self.output_file, "w")
+        self._datasets = {}
+        self._n_frames = 0
+        # Allocate HDF5 datasets in blocks rather than resizing every frame.
+        self._resize_block = 100
+
+        try:
+            if "entry" not in self.fh:
                 self.write_header()
+        except Exception:
+            self.fh.close()
+            raise
         
     def write_header(self):
         """
@@ -425,6 +434,26 @@ class NXWriter:
 
             entry.attrs["default"] = "data"
 
+    def close(self):
+        """Trim datasets to the actual number of frames and close the HDF5 file."""
+
+        if self.fh is None or not self.fh.id.valid:
+            return
+
+        try:
+            # Remove unused preallocated rows.
+            for dset in self._datasets.values():
+                if dset is not None and dset.id.valid:
+                    if dset.shape[0] != self._n_frames:
+                        dset.resize(self._n_frames, axis=0)
+
+            self.fh.flush()
+
+        finally:
+            self.fh.close()
+            self.fh = None
+            self._datasets.clear()
+
     def add_data(self, integrated_data):
         """
         Add azimuthal integration data to the HDF5 file under the proper NXdata group.
@@ -439,59 +468,86 @@ class NXWriter:
 
         I, errors_1d, cake, errors_2d = integrated_data
         data = {}
-        with h5py.File(self.output_file, "r+") as fh_u:
-            if (self.write_1d and self.write_2d):
+        if self.write_1d and self.write_2d:
             # if cake is not None: # will have eta bins
-                data["/entry/azint1d/data/I"] = I
-                data["/entry/azint2d/data/I"] = cake
-                if self.ai.normalized:
-                    if "/entry/azint2d/data/norm" not in fh_u:
-                        data["/entry/azint2d/data/norm"] = self.ai.norm_2d
-                    if "/entry/azint1d/data/norm" not in fh_u:
-                        data["/entry/azint1d/data/norm"] = self.ai.norm_1d
-                if errors_2d is not None:
-                    data["/entry/azint2d/data/I_errors"] = errors_2d
-                if errors_1d is not None:
-                    data["/entry/azint1d/data/I_errors"] = errors_1d
-            elif self.write_1d:  # must be radial bins only, no eta, ie 1d.
-                data["/entry/data/I"] = I
-                if self.ai.normalized:
-                    if "/entry/data/norm" not in fh_u:
-                        data["/entry/data/norm"] = self.ai.norm_1d
-                if errors_1d is not None:
-                    data["/entry/data/I_errors"] = errors_1d
-            elif self.write_2d:
-                data["/entry/data/I"] = cake
-                if self.ai.normalized:
-                    if "/entry/data/norm" not in fh_u:
-                        data["/entry/data/norm"] = self.ai.norm_2d
-                if errors_2d is not None:
-                    data["/entry/data/I_errors"] = errors_2d
-            else:
-                logging.error(f"At least one of 1D or 2D should be written")
+            data["/entry/azint1d/data/I"] = I
+            data["/entry/azint2d/data/I"] = cake
+            if self.ai.normalized:
+                if "/entry/azint2d/data/norm" not in self.fh:
+                    data["/entry/azint2d/data/norm"] = self.ai.norm_2d
+                if "/entry/azint1d/data/norm" not in self.fh:
+                    data["/entry/azint1d/data/norm"] = self.ai.norm_1d
+            if errors_2d is not None:
+                data["/entry/azint2d/data/I_errors"] = errors_2d
+            if errors_1d is not None:
+                data["/entry/azint1d/data/I_errors"] = errors_1d
+        elif self.write_1d:
+            data["/entry/data/I"] = I
+            if self.ai.normalized:
+                if "/entry/data/norm" not in self.fh:
+                    data["/entry/data/norm"] = self.ai.norm_1d
+            if errors_1d is not None:
+                data["/entry/data/I_errors"] = errors_1d
+        elif self.write_2d:
+            data["/entry/data/I"] = cake
+            if self.ai.normalized:
+                if "/entry/data/norm" not in self.fh:
+                    data["/entry/data/norm"] = self.ai.norm_2d
+            if errors_2d is not None:
+                data["/entry/data/I_errors"] = errors_2d
+        else:
+            logging.error("At least one of 1D or 2D should be written")
+            return
+        n = self._n_frames
+        if n % self._resize_block == 0:
+            new_size = n + self._resize_block
 
-            for key, value in data.items():
-                new_dset = fh_u.get(key)
-                if not new_dset:
-                    if "norm" in key:
-                        new_dset = fh_u.create_dataset(key, data=value, track_order=True)
-                    else:
-                        new_dset = fh_u.create_dataset(key, dtype=value.dtype,
-                                                   shape=(0, *value.shape),
-                                                   maxshape=(None, *value.shape),
-                                                   chunks=(1, *value.shape))
-                    # I and I_error created here
-                    new_dset.attrs["units"] = "arbitrary units"
-                    new_dset.attrs["long_name"] = "intensity"
+            for key, dset in self._datasets.items():
+                if dset is not None and dset.id.valid:
+                    dset.resize(new_size, axis=0)
+
+            n = self._n_frames
+
+        for key, value in data.items():
+            if "norm" in key:
+                if key not in self.fh:
+                    self.fh.create_dataset(
+                        key,
+                        data=value,
+                        track_order=True
+                    )
+                continue
+
+            dset = self._datasets.get(key)
+
+            if dset is None:
+                if key in self.fh:
+                    dset = self.fh[key]
+                else:
+                    dset = self.fh.create_dataset(
+                        key,
+                        dtype=value.dtype,
+                        shape=(n + self._resize_block, *value.shape),
+                        maxshape=(None, *value.shape),
+                        chunks=(1, *value.shape),
+                    )
+
+                    dset.attrs["units"] = "arbitrary units"
+                    dset.attrs["long_name"] = "intensity"
                     if "I_error" in key:
-                        new_dset.attrs.modify("long_name", "estimated errors on intensity")
-                    if "norm" in key:
-                        new_dset.attrs.modify("long_name", "effective number of pixels contributing to the corresponding bin")
+                        dset.attrs.modify(
+                            "long_name",
+                            "estimated errors on intensity"
+                        )
 
-                if "norm" not in key:
-                    n = new_dset.shape[0]
-                    new_dset.resize(n + 1, axis=0)
-                    new_dset[n] = value
+                self._datasets[key] = dset
+
+            elif n >= dset.shape[0]:
+                dset.resize(n + self._resize_block, axis=0)
+
+            dset[n] = value
+
+        self._n_frames += 1
 
     def write_radial_axis(self, group, unit, radial_axis, radial_bins):
         # real dataset for radial axis is always "radial axis"
