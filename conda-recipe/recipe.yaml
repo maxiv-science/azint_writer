@@ -1,0 +1,22 @@
+package:
+  name: azint-writer
+  version: ${{ env.get("SETUPTOOLS_SCM_PRETEND_VERSION") }}
+
+source:
+  path: ..
+
+build:
+  script:
+    - ${{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools_scm
+  run:
+    - python
+
+about:
+  license: MIT
+  license_file: LICENSE
