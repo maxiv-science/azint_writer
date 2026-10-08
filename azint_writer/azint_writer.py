@@ -99,9 +99,9 @@ class NXWriter:
         if not (self.write_1d and self.write_2d):
             logging.info(f"Creating {'NXazint1d' if self.write_1d else 'NXazint2d'}")
             try:
-                self.fh.attrs.setdefault("file_name", np.string_(os.path.basename(self.output_file)))
-                self.fh.attrs.setdefault("file_time", np.string_(datetime.now().isoformat()))
-                self.fh.attrs.setdefault("HDF5_Version", np.string_(h5py.version.hdf5_version))
+                self.fh.attrs.setdefault("file_name", np.bytes_(os.path.basename(self.output_file)))
+                self.fh.attrs.setdefault("file_time", np.bytes_(datetime.now().isoformat()))
+                self.fh.attrs.setdefault("HDF5_Version", np.bytes_(h5py.version.hdf5_version))
             except Exception as e:
                 logging.debug(f"Could not set global attributes: {e}")
             
@@ -126,7 +126,7 @@ class NXWriter:
         instrument.attrs["default"] = "name" 
         logging.info(f"Instrument: {self.instrument_name}")
         
-        instrument["name"] = np.string_(self.instrument_name)
+        instrument["name"] = np.bytes_(self.instrument_name)
 
         # Add monochromator
         mono = instrument.create_group("monochromator", track_order=True)
@@ -553,7 +553,7 @@ def add_monitor(h5file, monitor_data):
             try:
                 # Get or create the monitor group
                 monitor = fh_u.require_group(f"{entry_path}/monitor")
-                monitor.attrs["NX_class"] = np.string_("NXmonitor")
+                monitor.attrs["NX_class"] = np.bytes_("NXmonitor")
 
                 # Check if 'data' exists and update if possible
                 if "data" in monitor:
